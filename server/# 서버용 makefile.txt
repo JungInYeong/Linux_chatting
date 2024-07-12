@@ -1,0 +1,36 @@
+# 서버용 makefile
+
+CC = gcc
+# 리눅스 컴파일러
+
+# 만들타겟(리눅스용)
+serv_out = server.out
+
+# 컴파일에 필요한 obj 파일들
+OBJS = serv_shell.o serv_commu.o serv_DB.o
+
+CFLAGS = -lpthread
+
+# 실행파일 만들기
+$(serv_out) : $(OBJS)
+        $(CC) $(CFLAGS) $(OBJS) -o $@
+        rm *.o
+
+# obj 제작
+serv_shell.o : serv_shell.c
+        $(CC) $(CFLAGS) -c serv_shell.c
+
+serv_DB.o : serv_DB.c
+        $(CC) $(CFLAGS) -c serv_DB.c
+
+serv_commu.o : serv_commu.c
+        $(CC) $(CFLAGS) -c serv_commu.c
+
+clean_o : 
+        rm *.o
+
+clean_out :
+        rm *.out
+
+test : 
+        echo makefile_OK
