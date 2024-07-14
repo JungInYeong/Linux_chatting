@@ -11,23 +11,25 @@
 #include <pthread.h>
 #include <stdbool.h>
 
+
 #define PORT 7889
 #define CMDLEN 11
 
-#define CLNT_MAX 3                     // ÃÑ ¼ÒÈ­ÇÒ ¼ö ÀÖ´Â Å¬¶ó ¼ö
-#define BUFFSIZE 131                    // Å¬¶ó¿¡°Ô ¹Ş´Â ÆĞÅ¶À» ´ãÀ» ¹öÆÛ Å©±â
-#define WAIT_NUM 5                      // accept ¹Ş±â±îÁöÀÇ ´ë±âÀÚ ¼ö
-#define IDSIZE 21                       // »ç¿ëÀÚ id ÃÖ´ëÇã¿ë±æÀÌ
+#define CLNT_MAX 3                     // ì´ ì†Œí™”í•  ìˆ˜ ìˆëŠ” í´ë¼ ìˆ˜
+#define BUFFSIZE 131                    // í´ë¼ì—ê²Œ ë°›ëŠ” íŒ¨í‚·ì„ ë‹´ì„ ë²„í¼ í¬ê¸°
+#define WAIT_NUM 5                      // accept ë°›ê¸°ê¹Œì§€ì˜ ëŒ€ê¸°ì ìˆ˜
+#define IDSIZE 21                       // ì‚¬ìš©ì id ìµœëŒ€í—ˆìš©ê¸¸ì´
 
-// Ä¿¸Çµå
+// ì»¤ë§¨ë“œ
 #define QUIT "-q"
 #define KICK "-k"
 #define PRNT "-p"
 
-extern int clnt_socketList[CLNT_MAX];   // Å¬¶óÀÌ¾ğÆ®¿ÍÀÇ 1:1 ¼ÒÄÏ ½Äº°ÀÚµé ÀúÀå
-extern int clnt_cnt;                    // ÀÓ½Ã·Î ¹ŞÀ» Å¬¶ó¼ÒÄÏ ½Äº°ÀÚ
+extern int clnt_socketList[CLNT_MAX];   // í´ë¼ì´ì–¸íŠ¸ì™€ì˜ 1:1 ì†Œì¼“ ì‹ë³„ìë“¤ ì €ì¥
+extern int clnt_cnt;                    // ì„ì‹œë¡œ ë°›ì„ í´ë¼ì†Œì¼“ ì‹ë³„ì
 extern pthread_mutex_t mtx;
 extern bool server_down;
+extern pthread_t clnt_threadList[CLNT_MAX];
 
 typedef struct 
 {
@@ -38,11 +40,13 @@ typedef struct
 
 void* clnt_handler(void *arg);
 void* input_cmd(void* Args);
+void* accept_connections(void * arg);
+void cleanup_handler(void *arg);
 void send_all_clnt(char *buffer, int from_clnt_socket, bool is_alarm);
 void extractID(char clnt_id[],char buffer[]);
 
-#define DEBUG // µğ¹ö±×¿ë
-#ifdef DEBUG // µğ¹ö±×¿ë ÇÔ¼ö¿øÇü
+#define DEBUG // ë””ë²„ê·¸ìš©
+#ifdef DEBUG // ë””ë²„ê·¸ìš© í•¨ìˆ˜ì›í˜•
 
 void login_ID(int clnt_socket, char packet[]);
 void login_PW(int clnt_socket, char packet[]);
@@ -51,6 +55,6 @@ void save_Info(int clnt_socket, char packet[]);
 
 #else
 
-// Á¤ÀÎ¿µÀÌ Ã¤¿ì±â
+// ì •ì¸ì˜ì´ ì±„ìš°ê¸°
 
 #endif

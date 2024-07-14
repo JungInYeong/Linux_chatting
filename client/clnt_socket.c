@@ -6,314 +6,314 @@ extern pthread_mutex_t mtx;
 
 bool is_correctIP(char IP[], int length)
 {
-        int dotCnt = 0;
-        int charDiff = 0;
+	int dotCnt = 0;
+	int charDiff = 0;
 
-        for (int i = 0; i < length; i++)
-        {
-                if (IP[i] == '.')
-                {
-                        dotCnt++;
-                        continue;
-                }
+	for (int i = 0; i < length; i++)
+	{
+		if (IP[i] == '.')
+		{
+			dotCnt++;
+			continue;
+		}
 
-                charDiff = IP[i] - '0';
+		charDiff = IP[i] - '0';
 
-                if (!(0 <= charDiff && charDiff <= 9)) // 0~9±îÁöÀÇ ¼öÀÎÁö È®ÀÎ
-                        return false;
-        }
+		if (!(0 <= charDiff && charDiff <= 9)) // 0~9ê¹Œì§€ì˜ ìˆ˜ì¸ì§€ í™•ì¸
+			return false;
+	}
 
-        if (dotCnt != 3) // ip ÁÖ¼Ò¿¡ .ÀÌ 3°³°¡ ¾Æ´Ô -> À¯È¿ÇÏÁö ¾ÊÀº ip
-                return false;
+	if (dotCnt != 3) // ip ì£¼ì†Œì— .ì´ 3ê°œê°€ ì•„ë‹˜ -> ìœ íš¨í•˜ì§€ ì•Šì€ ip
+		return false;
 
-        return true;
+	return true;
 }
 
 bool login_process(int serv_socket, int* errCode, char* userID)
 {
-        char inputID[IDSIZE];
-        char inputPW[IDSIZE];
-        char inputPW2[IDSIZE];
-        char DBmsg[DBPKSIZE];
+	char inputID[IDSIZE];
+	char inputPW[IDSIZE];
+	char inputPW2[IDSIZE];
+	char DBmsg[DBPKSIZE];
 
-        int IDsuccess = 0;      // ¼º°ø¿©ºÎ (bool À» ¾²±â¿¡´Â ²²¸§Ä¢ÇØ¼­)
-        int PWsuccess = 0;
-        int length;                     // ¼ö½Å¹ŞÀº ÆĞÅ¶ÀÇ ±æÀÌ
+	int IDsuccess = 0;	// ì„±ê³µì—¬ë¶€ (bool ì„ ì“°ê¸°ì—ëŠ” ê»˜ë¦„ì¹™í•´ì„œ)
+	int PWsuccess = 0;
+	int length;			// ìˆ˜ì‹ ë°›ì€ íŒ¨í‚·ì˜ ê¸¸ì´
 
-        // ID È®ÀÎ
+	// ID í™•ì¸
 
-        while (!IDsuccess)
-        {
-                //system("clear");
-                memset(DBmsg, 0, DBPKSIZE);
-                memset(inputID, 0, IDSIZE);
+	while (!IDsuccess)
+	{
+		//system("clear");
+		memset(DBmsg, 0, DBPKSIZE);
+		memset(inputID, 0, IDSIZE);
 
-                printf("'q' is quit this sequence\ninput your ID : ");
-                fgets(inputID, IDSIZE - 1, stdin);      // 20ÀÚ±îÁö¸¸ ÀÔ·Â¹ŞÀ½
-                inputID[strcspn(inputID, "\n")] = 0; // °³Çà ¹®ÀÚ Á¦°Å
+		printf("'q' is quit this sequence\ninput your ID : ");
+		fgets(inputID, IDSIZE - 1, stdin);	// 20ìê¹Œì§€ë§Œ ì…ë ¥ë°›ìŒ
+		inputID[strcspn(inputID, "\n")] = 0; // ê°œí–‰ ë¬¸ì ì œê±°
 
-                if (strcmp(inputID, "q") == 0 || strcmp(inputID, "Q") == 0)
-                        // ¿À·ù 1 : »ç¿ëÀÚ°¡ Æ÷±âÇÏ°í ²¨¹ö¸®´Â °æ¿ì
-                {
-                        printf("\nquitting this sequence...\n");
-                        *errCode = 1;
-                        return false;
-                }
+		if (strcmp(inputID, "q") == 0 || strcmp(inputID, "Q") == 0)
+			// ì˜¤ë¥˜ 1 : ì‚¬ìš©ìê°€ í¬ê¸°í•˜ê³  êº¼ë²„ë¦¬ëŠ” ê²½ìš°
+		{
+			printf("\nquitting this sequence...\n");
+			*errCode = 1;
+			return false;
+		}
 
-                sprintf(DBmsg, "ID %s", inputID);       // Ã¤ÆÃÀÌ ¾Æ´Ï¶ó¸é, Ã¹¹øÂ° ¹®ÀÚ°¡ [ °¡ ¾Æ´Ï´Ù
-                printf("\nthe server will verify that ID is correct\n");
+		sprintf(DBmsg, "ID %s", inputID);	// ì±„íŒ…ì´ ì•„ë‹ˆë¼ë©´, ì²«ë²ˆì§¸ ë¬¸ìê°€ [ ê°€ ì•„ë‹ˆë‹¤
+		printf("\nthe server will verify that ID is correct\n");
 
-                if (write(serv_socket, DBmsg, strlen(DBmsg) + 1) < 0)// ¼­¹ö¿¡ ID º¸³»±â
-                {
-                        printf("there is a problem with sending ID process!\n"); // ¿À·ù 2 : Á¦´ë·Î ID Àü¼Û¸øÇÔ
-                        *errCode = 2;
-                        return false; // ¹Ù·Î ²¨¹ö¸®±â
-                }
+		if (write(serv_socket, DBmsg, strlen(DBmsg) + 1) < 0)// ì„œë²„ì— ID ë³´ë‚´ê¸°
+		{
+			printf("there is a problem with sending ID process!\n"); // ì˜¤ë¥˜ 2 : ì œëŒ€ë¡œ ID ì „ì†¡ëª»í•¨
+			*errCode = 2;
+			return false; // ë°”ë¡œ êº¼ë²„ë¦¬ê¸°
+		}
 
-                /*------------------------*/
-                // read ÇÔ¼ö´Â ¼ö½Å¹ŞÀ» ¶§±îÁö ±â´Ù¸°´Ù
-                /*-------------------------*/
+		/*------------------------*/
+		// read í•¨ìˆ˜ëŠ” ìˆ˜ì‹ ë°›ì„ ë•Œê¹Œì§€ ê¸°ë‹¤ë¦°ë‹¤
+		/*-------------------------*/
 
-                if ((length = read(serv_socket, &IDsuccess, sizeof(int))) != sizeof(int)) // Á¦´ë·Î ¼ö½Å¹ŞÁö ¸øÇÔ
-                {
-                        printf("there is a problem with receiving result process!\n"); // ¿À·ù 3 : Á¦´ë·Î ID °á°ú ¼ö½Å¸ø¹ŞÀ½
-                        *errCode = 3;
-                        return false; // ¹Ù·Î ²¨¹ö¸®±â
-                }
+		if ((length = read(serv_socket, &IDsuccess, sizeof(int))) != sizeof(int)) // ì œëŒ€ë¡œ ìˆ˜ì‹ ë°›ì§€ ëª»í•¨
+		{
+			printf("there is a problem with receiving result process!\n"); // ì˜¤ë¥˜ 3 : ì œëŒ€ë¡œ ID ê²°ê³¼ ìˆ˜ì‹ ëª»ë°›ìŒ
+			*errCode = 3;
+			return false; // ë°”ë¡œ êº¼ë²„ë¦¬ê¸°
+		}
 
-                if (!IDsuccess)
-                        printf("Invalid ID, Try again\n");
-        }
+		if (!IDsuccess)
+			printf("Invalid ID, Try again\n");
+	}
 
-        // PW È®ÀÎ
+	// PW í™•ì¸
 
-        while (!PWsuccess)
-        {
-                //system("clear");
-                printf("\n\nID is correct!\n\n");
-                memset(DBmsg, 0, DBPKSIZE);
-                memset(inputPW, 0, IDSIZE);
-                memset(inputPW2, 0, IDSIZE);
+	while (!PWsuccess)
+	{
+		//system("clear");
+		printf("\n\nID is correct!\n\n");
+		memset(DBmsg, 0, DBPKSIZE);
+		memset(inputPW, 0, IDSIZE);
+		memset(inputPW2, 0, IDSIZE);
 
-                printf("'q' is quit this sequence\ninput your PW : ");
-                fgets(inputPW, IDSIZE - 1, stdin);      // 20ÀÚ±îÁö¸¸ ÀÔ·Â¹ŞÀ½
-                inputPW[strcspn(inputPW, "\n")] = 0;
+		printf("'q' is quit this sequence\ninput your PW : ");
+		fgets(inputPW, IDSIZE - 1, stdin);	// 20ìê¹Œì§€ë§Œ ì…ë ¥ë°›ìŒ
+		inputPW[strcspn(inputPW, "\n")] = 0;			
 
-                if (strcmp(inputPW, "q") == 0 || strcmp(inputPW, "Q") == 0)
-                        // ¿À·ù 1 : »ç¿ëÀÚ°¡ Æ÷±âÇÏ°í ²¨¹ö¸®´Â °æ¿ì
-                {
-                        printf("\nquitting this sequence...\n");
-                        *errCode = 1;
-                        return false;
-                }
+		if (strcmp(inputPW, "q") == 0 || strcmp(inputPW, "Q") == 0)
+			// ì˜¤ë¥˜ 1 : ì‚¬ìš©ìê°€ í¬ê¸°í•˜ê³  êº¼ë²„ë¦¬ëŠ” ê²½ìš°
+		{
+			printf("\nquitting this sequence...\n");
+			*errCode = 1;
+			return false;
+		}
 
+		
+		sprintf(DBmsg, "PW %s %s", inputID, inputPW);
+		printf("\nthe server will verify that PW is correct\n");
 
-                sprintf(DBmsg, "PW %s %s", inputID, inputPW);
-                printf("\nthe server will verify that PW is correct\n");
+		if (write(serv_socket, DBmsg, strlen(DBmsg) + 1) < 0) // ì„œë²„ì— PW ë³´ë‚´ê¸°
+		{
+			printf("there is a problem with sending PW process!\n"); // ì˜¤ë¥˜ 4 : ì œëŒ€ë¡œ PW ì „ì†¡ëª»í•¨
+			*errCode = 4;
+			return false;
+		}
 
-                if (write(serv_socket, DBmsg, strlen(DBmsg) + 1) < 0) // ¼­¹ö¿¡ PW º¸³»±â
-                {
-                        printf("there is a problem with sending PW process!\n"); // ¿À·ù 4 : Á¦´ë·Î PW Àü¼Û¸øÇÔ
-                        *errCode = 4;
-                        return false;
-                }
+		/*------------------------*/
+		// read í•¨ìˆ˜ëŠ” ìˆ˜ì‹ ë°›ì„ ë•Œê¹Œì§€ ê¸°ë‹¤ë¦°ë‹¤
+		/*-------------------------*/
 
-                /*------------------------*/
-                // read ÇÔ¼ö´Â ¼ö½Å¹ŞÀ» ¶§±îÁö ±â´Ù¸°´Ù
-                /*-------------------------*/
+		if ((length = read(serv_socket, &PWsuccess, sizeof(int))) != sizeof(int)) // ì œëŒ€ë¡œ ìˆ˜ì‹ ë°›ì§€ ëª»í•¨
+		{
+			printf("there is a problem with receiving PW result process!\n"); // ì˜¤ë¥˜ 5 : ì œëŒ€ë¡œ PW ê²°ê³¼ ìˆ˜ì‹ ëª»ë°›ìŒ
+			*errCode = 5;
+			return false; // ë°”ë¡œ êº¼ë²„ë¦¬ê¸°
+		}
 
-                if ((length = read(serv_socket, &PWsuccess, sizeof(int))) != sizeof(int)) // Á¦´ë·Î ¼ö½Å¹ŞÁö ¸øÇÔ
-                {
-                        printf("there is a problem with receiving PW result process!\n"); // ¿À·ù 5 : Á¦´ë·Î PW °á°ú ¼ö½Å¸ø¹ŞÀ½
-                        *errCode = 5;
-                        return false; // ¹Ù·Î ²¨¹ö¸®±â
-                }
+		if (!PWsuccess)
+			printf("Invalid PW, Try again\n");
+	}
 
-                if (!PWsuccess)
-                        printf("Invalid PW, Try again\n");
-        }
+	printf("PW is correct!\nmoving to chatting screen...\n");
 
-        printf("PW is correct!\nmoving to chatting screen...\n");
-
-        *errCode = 0;
-        strcpy(userID, inputID);
-        return true;
+	*errCode = 0;
+	strcpy(userID, inputID);
+	return true;
 }
 
 bool signup_process(int serv_socket, int* errCode, char* userID)
 {
-        char inputID[IDSIZE];
-        char inputPW[IDSIZE];
-        char inputPW2[IDSIZE];
-        char DBmsg[DBPKSIZE];
-        char ans;
+	char inputID[IDSIZE];
+	char inputPW[IDSIZE];
+	char inputPW2[IDSIZE];
+	char DBmsg[DBPKSIZE];
+	char ans;
 
-        int IDsuccess = 0;
-        int PWsuccess = 0;
-        int Savesuccess = 0;
-        int length = 0;
+	int IDsuccess = 0;
+	int PWsuccess = 0;
+	int Savesuccess = 0;
+	int length = 0;
 
 restart:
 
-        // ID ÀÔ·Â
-        while (!IDsuccess)
-        {
-                memset(inputID, 0, IDSIZE);
-                //system("clear");
+	// ID ì…ë ¥
+	while (!IDsuccess)
+	{
+		memset(inputID, 0, IDSIZE);
+		//system("clear");
 
-                printf("the number of characters is limited to 20 characters\n");
-                printf("'q' is quit this sequence\ninput your Penguin's ID : ");
+		printf("the number of characters is limited to 20 characters\n");
+		printf("'q' is quit this sequence\ninput your Penguin's ID : ");
 
-                fgets(inputID, IDSIZE - 1, stdin);      // 20ÀÚ±îÁö¸¸ ÀÔ·Â¹ŞÀ½
-                inputID[strcspn(inputID, "\n")] = 0;
+		fgets(inputID, IDSIZE - 1, stdin);	// 20ìê¹Œì§€ë§Œ ì…ë ¥ë°›ìŒ
+		inputID[strcspn(inputID, "\n")] = 0;
+		
+		if (strcmp(inputID, "q") == 0 || strcmp(inputID, "Q") == 0)
+			// ì˜¤ë¥˜ 1 : ì‚¬ìš©ìê°€ í¬ê¸°í•˜ê³  êº¼ë²„ë¦¬ëŠ” ê²½ìš°
+		{
+			printf("\nquitting this sequence...\n");
+			*errCode = 1;
+			return false;
+		}
 
-                if (strcmp(inputID, "q") == 0 || strcmp(inputID, "Q") == 0)
-                        // ¿À·ù 1 : »ç¿ëÀÚ°¡ Æ÷±âÇÏ°í ²¨¹ö¸®´Â °æ¿ì
-                {
-                        printf("\nquitting this sequence...\n");
-                        *errCode = 1;
-                        return false;
-                }
+		if(!follow_rules(inputID))      // ê·œì¹™ : 7ìì´ìƒ && ë„ì–´ì“°ê¸° ê¸ˆì§€
+			continue;
 
-                if(!follow_rules(inputID))      // ±ÔÄ¢ : 7ÀÚÀÌ»ó && ¶ç¾î¾²±â ±İÁö
-                        continue;
+		printf("\nplease double check if your ID is correct [%s]\n", inputID);	// 21ìì´ìƒì€ ì•ˆë“¤ì–´ ê°€ê¸°ì— ì¬í™•ì¸
+		printf("is that right? : [y/n] : ");
+		scanf("%c", &ans);
+		while (getchar() != '\n');
 
-                printf("\nplease double check if your ID is correct [%s]\n", inputID);  // 21ÀÚÀÌ»óÀº ¾Èµé¾î °¡±â¿¡ ÀçÈ®ÀÎ
-                printf("is that right? : [y/n] : ");
-                scanf("%c", &ans);
-                while (getchar() != '\n');
+		if (ans == 'y' || ans == 'Y') // ì‚¬ìš©ìì˜ idê°€ ê²°ì •ë¨
+		{
+			printf("your ID has been determined\n");
+			printf("the server will see if it is a unique id...\n");
+		}
+		else // ì²˜ìŒë¶€í„° ë‹¤ì‹œ
+		{
+			printf("try again!\n");
+			continue;
+		}
 
-                if (ans == 'y' || ans == 'Y') // »ç¿ëÀÚÀÇ id°¡ °áÁ¤µÊ
-                {
-                        printf("your ID has been determined\n");
-                        printf("the server will see if it is a unique id...\n");
-                }
-                else // Ã³À½ºÎÅÍ ´Ù½Ã
-                {
-                        printf("try again!\n");
-                        continue;
-                }
+		memset(DBmsg, 0, DBPKSIZE);
+		sprintf(DBmsg, "id %s", inputID);
 
-                memset(DBmsg, 0, DBPKSIZE);
-                sprintf(DBmsg, "id %s", inputID);
+		if (write(serv_socket, DBmsg, strlen(DBmsg) + 1) < 0) // ì„œë²„ì— ID ë³´ë‚´ê¸°
+		{
+			printf("there is a problem with sending ID process!\n"); // ì˜¤ë¥˜ 6 : ì œëŒ€ë¡œ ID ì „ì†¡ëª»í•¨
+			*errCode = 6;
+			return false;
+		}
 
-                if (write(serv_socket, DBmsg, strlen(DBmsg) + 1) < 0) // ¼­¹ö¿¡ ID º¸³»±â
-                {
-                        printf("there is a problem with sending ID process!\n"); // ¿À·ù 6 : Á¦´ë·Î ID Àü¼Û¸øÇÔ
-                        *errCode = 6;
-                        return false;
-                }
+		if ((length = read(serv_socket, &IDsuccess, sizeof(int))) != sizeof(int))
+		{
+			printf("there is a problem with receiving result process!\n"); // ì˜¤ë¥˜ 7 : IDê°€ ê³ ìœ í•œì§€ ì œëŒ€ë¡œ ìˆ˜ì‹ ë°›ì§€ ëª»í•¨
+			*errCode = 7;
+			return false;
+		}
 
-                if ((length = read(serv_socket, &IDsuccess, sizeof(int))) != sizeof(int))
-                {
-                        printf("there is a problem with receiving result process!\n"); // ¿À·ù 7 : ID°¡ °íÀ¯ÇÑÁö Á¦´ë·Î ¼ö½Å¹ŞÁö ¸øÇÔ
-                        *errCode = 7;
-                        return false;
-                }
+		if (!IDsuccess)
+			printf("ID already exists, try again\n");
 
-                if (!IDsuccess)
-                        printf("ID already exists, try again\n");
+		// ì—¬ê¸°ì„œ idê°€ ì„œë²„ì— ì…ë ¥ë˜ëŠ” ê²ƒì´ ì•„ë‹Œ, pwê¹Œì§€ ì…ë ¥ë°›ê³ , í•œë²ˆì— í•©ì³ì„œ ì„œë²„ì— ì „ì†¡ëœë‹¤.
+		// í˜„ì¬ëŠ” ê·¸ëƒ¥ idê°€ ê³ ìœ í•œì§€ í™•ì¸í•  ë¿ì´ë‹¤.
+	}
 
-                // ¿©±â¼­ id°¡ ¼­¹ö¿¡ ÀÔ·ÂµÇ´Â °ÍÀÌ ¾Æ´Ñ, pw±îÁö ÀÔ·Â¹Ş°í, ÇÑ¹ø¿¡ ÇÕÃÄ¼­ ¼­¹ö¿¡ Àü¼ÛµÈ´Ù.
-                // ÇöÀç´Â ±×³É id°¡ °íÀ¯ÇÑÁö È®ÀÎÇÒ »ÓÀÌ´Ù.
-        }
+	// PW ì…ë ¥
 
-        // PW ÀÔ·Â
+	while (!PWsuccess)
+	{
+		//system("clear");
+		memset(inputPW, 0, IDSIZE);
+		memset(inputPW2, 0, IDSIZE);
 
-        while (!PWsuccess)
-        {
-                //system("clear");
-                memset(inputPW, 0, IDSIZE);
-                memset(inputPW2, 0, IDSIZE);
+		printf("the number of characters is limited to 20 characters\n");
+		printf("'q' is quit this sequence\n");
+		printf("input your Penguin accounts[%s]'s PW : ", inputID);
 
-                printf("the number of characters is limited to 20 characters\n");
-                printf("'q' is quit this sequence\n");
-                printf("input your Penguin accounts[%s]'s PW : ", inputID);
+		fgets(inputPW, IDSIZE - 1, stdin);	// 20ìê¹Œì§€ë§Œ ì…ë ¥ë°›ìŒ
+		inputPW[strcspn(inputPW, "\n")] = 0;
 
-                fgets(inputPW, IDSIZE - 1, stdin);      // 20ÀÚ±îÁö¸¸ ÀÔ·Â¹ŞÀ½
-                inputPW[strcspn(inputPW, "\n")] = 0;
+		if (strcmp(inputPW, "q") == 0 || strcmp(inputPW, "Q") == 0)
+			// ì˜¤ë¥˜ 1 : ì‚¬ìš©ìê°€ í¬ê¸°í•˜ê³  êº¼ë²„ë¦¬ëŠ” ê²½ìš°
+		{
+			printf("\nquitting this sequence...\n");
+			*errCode = 1;
+			return false;
+		}
 
-                if (strcmp(inputPW, "q") == 0 || strcmp(inputPW, "Q") == 0)
-                        // ¿À·ù 1 : »ç¿ëÀÚ°¡ Æ÷±âÇÏ°í ²¨¹ö¸®´Â °æ¿ì
-                {
-                        printf("\nquitting this sequence...\n");
-                        *errCode = 1;
-                        return false;
-                }
+		if(!follow_rules(inputPW))      // ê·œì¹™ : 7ìì´ìƒ && ë„ì–´ì“°ê¸° ê¸ˆì§€
+             		continue;
 
-                if(!follow_rules(inputPW))      // ±ÔÄ¢ : 7ÀÚÀÌ»ó && ¶ç¾î¾²±â ±İÁö
-                        continue;
+		printf("please input your PW again : "); // pw ë‹¤ì‹œ ì…ë ¥ë°›ê¸°
+		fgets(inputPW2, IDSIZE - 1, stdin);
+		inputPW2[strcspn(inputPW2, "\n")] = 0;
+		
+		if(!follow_rules(inputPW2))      // ê·œì¹™ : 7ìì´ìƒ && ë„ì–´ì“°ê¸° ê¸ˆì§€
+            		continue;
 
-                printf("please input your PW again : "); // pw ´Ù½Ã ÀÔ·Â¹Ş±â
-                fgets(inputPW2, IDSIZE - 1, stdin);
-                inputPW2[strcspn(inputPW2, "\n")] = 0;
+		if (strcmp(inputPW, inputPW2)) // ë‘ê°œê°€ ê°™ì€ì§€ í™•ì¸
+			printf("\nyour passwords do not match, try again\n");
+		else
+		{
+			printf("\nyour passwords match\n");
+			PWsuccess = 1;
+		}
+	}
 
-                if(!follow_rules(inputPW2))      // ±ÔÄ¢ : 7ÀÚÀÌ»ó && ¶ç¾î¾²±â ±İÁö
-                        continue;
+	// ì¤‘ê°„ì— ì‚¬ìš©ìê°€ êº¼ë²„ë¦´ìˆ˜ë„ ìˆê¸° ë•Œë¬¸ì—, IDì™€ ë¹„ë²ˆì„ í•©ì³ì„œ ì„œë²„ì— ì „ì†¡
+	printf("sending the account information to the server...\n");
 
-                if (strcmp(inputPW, inputPW2)) // µÎ°³°¡ °°ÀºÁö È®ÀÎ
-                        printf("\nyour passwords do not match, try again\n");
-                else
-                {
-                        printf("\nyour passwords match\n");
-                        PWsuccess = 1;
-                }
-        }
+	memset(DBmsg, 0, DBPKSIZE);
+	sprintf(DBmsg, "new %s %s", inputID, inputPW);
 
-        // Áß°£¿¡ »ç¿ëÀÚ°¡ ²¨¹ö¸±¼öµµ ÀÖ±â ¶§¹®¿¡, ID¿Í ºñ¹øÀ» ÇÕÃÄ¼­ ¼­¹ö¿¡ Àü¼Û
-        printf("sending the account information to the server...\n");
+	if (write(serv_socket, DBmsg, strlen(DBmsg) + 1) < 0) // ì„œë²„ì— ê³„ì •ì •ë³´ ë³´ë‚´ê¸°
+	{
+		printf("there was a problem sending account information\n"); // ì˜¤ë¥˜ 8 : ì œëŒ€ë¡œ ê³„ì •ì •ë³´ ì „ì†¡ëª»í•¨
+		*errCode = 8;
+		return false;
+	}
 
-        memset(DBmsg, 0, DBPKSIZE);
-        sprintf(DBmsg, "new %s %s", inputID, inputPW);
+	if ((length = read(serv_socket, &Savesuccess, sizeof(int))) != sizeof(int))
+	{
+		printf("the server encountered a problem saving the account\n"); // ì„œë²„ì—ì„œ ì œëŒ€ë¡œ ì €ì¥ì„ ëª»í–ˆì„ ë•Œ,
+		printf("wanna restart sign_up process? [y/n] : ");
+		scanf("%c", &ans);
+		while (getchar() != '\n');
 
-        if (write(serv_socket, DBmsg, strlen(DBmsg) + 1) < 0) // ¼­¹ö¿¡ °èÁ¤Á¤º¸ º¸³»±â
-        {
-                printf("there was a problem sending account information\n"); // ¿À·ù 8 : Á¦´ë·Î °èÁ¤Á¤º¸ Àü¼Û¸øÇÔ
-                *errCode = 8;
-                return false;
-        }
+		if (ans == 'y' || ans == 'Y')
+		{
+			IDsuccess = 0;
+			PWsuccess = 0;
+			goto restart;
+		}
 
-        if ((length = read(serv_socket, &Savesuccess, sizeof(int))) != sizeof(int))
-        {
-                printf("the server encountered a problem saving the account\n"); // ¼­¹ö¿¡¼­ Á¦´ë·Î ÀúÀåÀ» ¸øÇßÀ» ¶§,
-                printf("wanna restart sign_up process? [y/n] : ");
-                scanf("%c", &ans);
-                while (getchar() != '\n');
-
-                if (ans == 'y' || ans == 'Y')
-                {
-                        IDsuccess = 0;
-                        PWsuccess = 0;
-                        goto restart;
-                }
-
-                else
-                {
-                        printf("\nquitting this sequence...\n");
-                        return false;
-                }
-        }
-        else // È¸¿ø°¡ÀÔ¿Ï·á
-        {
-                printf("sign up process has been completed!\n");
-                printf("you can now enter the server with this account information!\n");
-                printf("moving to chatting screen...\n");
-                strcpy(userID, inputID);
-                *errCode = 0;
-                return true;
-        }
+		else
+		{
+			printf("\nquitting this sequence...\n");
+			return false;
+		}
+	}
+	else // íšŒì›ê°€ì…ì™„ë£Œ
+	{
+		printf("sign up process has been completed!\n");
+		printf("you can now enter the server with this account information!\n");
+		printf("moving to chatting screen...\n");
+		strcpy(userID, inputID);
+		*errCode = 0;
+		return true;
+	}
 }
 
 bool follow_rules(char input[])
 {
-    // 1. ±ÛÀÚ¼ö°¡ 7ÀÌ»óÀÏ°Í
+    // 1. ê¸€ììˆ˜ê°€ 7ì´ìƒì¼ê²ƒ
     if(strlen(input) < 7)
     {
         printf("please enter more than 7 characters, try again!\n");
         return false;
     }
 
-    // 2. ÀÔ·Â ¹®ÀÚ¿­¿¡ ¶ç¾î¾²±â°¡ ÀÖ´Â°¡?
+    // 2. ì…ë ¥ ë¬¸ìì—´ì— ë„ì–´ì“°ê¸°ê°€ ìˆëŠ”ê°€?
     for(int i=0; i<strlen(input); i++)
     {
         if(input[i] == ' ')

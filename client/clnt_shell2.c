@@ -6,10 +6,8 @@ pthread_mutex_t mtx;
 
 int main(int argsNum, char *args[])
 {
-    // ÀÏ´Ü ¸ÕÀú ¼­¹ö¿ÍÀÇ DB ¿¬°áÀ» À§ÇØ Åë½Å¸Á ±¸ÃàÇÏ±â
-
     /*-------------------------------------*/
-    // 1. Åë½Å¿¡ ÇÊ¿äÇÑ º¯¼öµé ¼±¾ğ +  ip°Ë»ç
+    // 1. í†µì‹ ì— í•„ìš”í•œ ë³€ìˆ˜ë“¤ ì„ ì–¸ +  ipê²€ì‚¬
     /*-------------------------------------*/
 
     int serv_socket;
@@ -21,11 +19,10 @@ int main(int argsNum, char *args[])
     char userID[IDSIZE];
     pthread_t recv_thread;
     pthread_t send_thread;
-    Args send_args = { 0, NULL, {0}}; // ½º·¹µå µ¿ÀÛÇÔ¼ö¿¡ ³Ñ±æ ÆÄ¶ó¹ÌÅÍ
+    Args send_args = { 0, NULL, {0}}; // ìŠ¤ë ˆë“œ ë™ì‘í•¨ìˆ˜ì— ë„˜ê¸¸ íŒŒë¼ë¯¸í„°
     Args recv_args = { 0, NULL, {0}};
 
-    // ¼­¹öÀÇ ip°¡ Á¦´ë·Î ÀÔ·ÂµÇ¾ú´ÂÁö °Ë»ç
-    if(argsNum < 2) // ¸ÕÀú ¸ŞÀÎÇÔ¼ö¿¡ ÆÄ¶ó¹ÌÅÍ°¡ µé¾î¿Ô´ÂÁö °Ë»ç
+    if(argsNum < 2) // ë¨¼ì € ë©”ì¸í•¨ìˆ˜ì— íŒŒë¼ë¯¸í„°ê°€ ë“¤ì–´ì™”ëŠ”ì§€ ê²€ì‚¬
     {
         printf("Input server IP address correctly!\n");
         return 0;
@@ -45,11 +42,10 @@ int main(int argsNum, char *args[])
     }
 
     /*-------------------------------------*/
-    // 2. ¼­¹ö¿Í Åë½ÅÇÒ ¼ÒÄÏ»ı¼º
+    // 2. ì„œë²„ì™€ í†µì‹ í•  ì†Œì¼“ìƒì„±
     /*-------------------------------------*/
-return_menu:
 
-    // ÁÖ¼Ò±¸Á¶Ã¼ ÃÊ±âÈ­
+return_menu:    
     memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = inet_addr(serv_ip);
@@ -57,7 +53,7 @@ return_menu:
 
     printf("socket is creating for server...\n");
 
-    serv_socket = socket(PF_INET, SOCK_STREAM, 0); // TCP¿ë
+    serv_socket = socket(PF_INET, SOCK_STREAM, 0); // TCPìš©
     if (serv_socket == -1)
     {
         printf("socket creation error!\n");
@@ -65,7 +61,7 @@ return_menu:
     }
 
     /*-------------------------------------*/
-    // 3. connect ÀıÂ÷
+    // 3. connect ì ˆì°¨
     /*-------------------------------------*/
 
     printf("socket is trying to connect with server...\n");
@@ -79,14 +75,14 @@ return_menu:
         printf("connecting success!\n");
 
     /*-------------------------------------*/
-    // 4. ¸ŞÀÎ¸Ş´º È­¸é ¶ç¿ì±â
+    // 4. ë©”ì¸ë©”ë‰´ í™”ë©´ ë„ìš°ê¸°
     /*-------------------------------------*/
 
     memset(userID, 0, IDSIZE);
 
     while (!login_success)
     {
-        //system("clear"); // È­¸é ÀüºÎ Áö¿ì±â
+        //system("clear"); // í™”ë©´ ì „ë¶€ ì§€ìš°ê¸°
 
         printf("-----Penguin version 1.0----\n");
         printf("1. login\n");
@@ -95,23 +91,23 @@ return_menu:
         printf("----------------------------\n");
         printf("input : _\b");
 
-        scanf("%d", &choose);        // ÀÔ·Â¹Ş±â
-        while (getchar() != '\n');   // ¿£ÅÍºñ¿ì±â
+        scanf("%d", &choose);        // ì…ë ¥ë°›ê¸°
+        while (getchar() != '\n');   // ì—”í„°ë¹„ìš°ê¸°
         putchar('\n');
 
         switch (choose)
         {
         case 1:
-            login_success = login_process(serv_socket, &DB_Err, userID);     // id¿Í pw¸¦ ÀÔ ·Â¹Ş¾Æ¼­ ¼­¹ö·Î ³Ñ±â±â -> À¯È¿ÇÏ¸é success = 1
+            login_success = login_process(serv_socket, &DB_Err, userID);     // idì™€ pwë¥¼ ì… ë ¥ë°›ì•„ì„œ ì„œë²„ë¡œ ë„˜ê¸°ê¸° -> ìœ íš¨í•˜ë©´ success = 1
             break;
 
         case 2:
-            login_success = signup_process(serv_socket, &DB_Err, userID);    // id¿Í pw¸¦ ÀÔ ·Â¹Ş¾Æ¼­ ¼­¹ö·Î ³Ñ°Ü¼­ À¯È¿ÇÑÁö È®ÀÎ
+            login_success = signup_process(serv_socket, &DB_Err, userID);    // idì™€ pwë¥¼ ì… ë ¥ë°›ì•„ì„œ ì„œë²„ë¡œ ë„˜ê²¨ì„œ ìœ íš¨í•œì§€ í™•ì¸
             break;
 
         case 3:
             printf("quit sequence\n");
-            //clean_process();                                     /* --- È¤½Ã ÀÖÀ» ½º·¹µåµé »èÁ¦ + Åë½ÅÇÁ·Î¼¼½º Á¾·á --- */
+            //clean_process();                                     /* --- í˜¹ì‹œ ìˆì„ ìŠ¤ë ˆë“œë“¤ ì‚­ì œ + í†µì‹ í”„ë¡œì„¸ìŠ¤ ì¢…ë£Œ --- */
             return 0;
             break;
 
@@ -124,57 +120,58 @@ return_menu:
     }
 
     /*-------------------------------------*/
-    // 5. Åë½Å¿¡ ÇÊ¿äÇÑ ½º·¹µå + ÆÄ¶ó¹ÌÅÍ ±¸Á¶Ã¼ + ¹ÂÅØ½º ¸¸µé±â
+    // 5. í†µì‹ ì— í•„ìš”í•œ ìŠ¤ë ˆë“œ + íŒŒë¼ë¯¸í„° êµ¬ì¡°ì²´ + ë®¤í…ìŠ¤ ë§Œë“¤ê¸°
     /*-------------------------------------*/
 
-    pthread_mutex_init(&mtx, NULL); // ÀÌÈÄ·Î ¿À·ù°¡ »ı±æ¶§¸¶´Ù ¹«Á¶°Ç ¹ÂÅØ½º ÆÄ±«ÇÔ¼öÈ£Ãâ   
+    pthread_mutex_init(&mtx, NULL); // ì´í›„ë¡œ ì˜¤ë¥˜ê°€ ìƒê¸¸ë•Œë§ˆë‹¤ ë¬´ì¡°ê±´ ë®¤í…ìŠ¤ íŒŒê´´í•¨ìˆ˜í˜¸ì¶œ   
 
     //system("clear");
-    static int commuErr = 0;  // ¸ŞÀÎ¸Ş´º·Î µ¹¾Æ¿À´Â °úÁ¤¿¡¼­ ¶Ç ¼±¾ğµÇ´Â°É ¹æÁö -> ¾îÂ÷ÇÇ commu.c¿¡¼­ ¹ÂÅØ½º·Î º¸È£µÊ
+    static int commuErr = 0;  // ë©”ì¸ë©”ë‰´ë¡œ ëŒì•„ì˜¤ëŠ” ê³¼ì •ì—ì„œ ë˜ ì„ ì–¸ë˜ëŠ”ê±¸ ë°©ì§€ -> ì–´ì°¨í”¼ commu.cì—ì„œ ë®¤í…ìŠ¤ë¡œ ë³´í˜¸ë¨
 
-    send_args.serv_socket = serv_socket; // ÆÄ¶ó¹ÌÅÍ ±¸Á¶Ã¼ ÃÊ±âÈ­
+    send_args.serv_socket = serv_socket; // íŒŒë¼ë¯¸í„° êµ¬ì¡°ì²´ ì´ˆê¸°í™”
     recv_args.serv_socket = serv_socket;
     send_args.errCode = &commuErr;
     recv_args.errCode = &commuErr;
     strcpy(send_args.userID, userID);
     strcpy(recv_args.userID, userID);
 
-    /*--- ¼öÁ¤ : ½º·¹µå ÇÔ¼ö¿¡ Àü´ŞÇÒ ÀÎÀÚ´Â ÇÏ³ª¹Û¿¡ Àü´Ş ¸øÇÑ´Ù ---*/
+    /*--- ìˆ˜ì • : ìŠ¤ë ˆë“œ í•¨ìˆ˜ì— ì „ë‹¬í•  ì¸ìëŠ” í•˜ë‚˜ë°–ì— ì „ë‹¬ ëª»í•œë‹¤ ---*/
 
-    pthread_create(&recv_thread, NULL, recv_msg, (void*)&recv_args); // ¼ö½Å¿ë ½º·¹µå        
-    pthread_create(&send_thread, NULL, send_msg, (void*)&send_args); // ¼Û½Å¿ë ½º·¹µå        
+    pthread_create(&recv_thread, NULL, recv_msg, (void*)&recv_args); // ìˆ˜ì‹ ìš© ìŠ¤ë ˆë“œ        
+    pthread_create(&send_thread, NULL, send_msg, (void*)&send_args); // ì†¡ì‹ ìš© ìŠ¤ë ˆë“œ        
     printf("threads were made for communication right now\n");
 
     /*-------------------------------------*/
-    // 6. ¿¡·¯È®ÀÎ + ¸®¼Ò½º ¹İÈ¯
+    // 6. ì—ëŸ¬í™•ì¸ + ë¦¬ì†ŒìŠ¤ ë°˜í™˜
     /*-------------------------------------*/
 
-    pthread_join(send_thread, NULL);
+    while(!session_down && !user_down) usleep(500);
+
+    // ë­ê°€ë¬ë˜ í”Œë˜ê·¸ë§Œ ë°›ê³  ë°”ë¡œ ì¢…ë£Œì‹œì¼œë²„ë¦¬ê¸°
+    pthread_cancel(recv_thread);
+    pthread_join(recv_thread,NULL);
+    printf("recv_thread : down\n");
+    
+    pthread_cancel(send_thread);
+    pthread_join(send_thread,NULL);
     printf("send_thread : down\n");
 
-    if(user_down)
-    {
-            pthread_cancel(recv_thread);
-            printf("force to terminate recv_thread!\n");
-    }
-
-    pthread_join(recv_thread, NULL);
-    printf("recv_thread : down\n");
     pthread_mutex_destroy(&mtx);
-
-    // system("clear");
     printf("threads and mutex were terminated!\n");
 
     if (commuErr == 1)
     {
         login_success = 0;
         DB_Err = 0;
+        commuErr = 0;
+	session_down = false;
+	user_down = false;
         goto return_menu;
     }
     else if (2 <= commuErr && commuErr <= 4)
         printf("communication errorCode : %d\n", commuErr);
-
-    close(serv_socket); // ¿ÏÀüÈ÷ Á¾·á
+    
+    close(serv_socket); // ì™„ì „íˆ ì¢…ë£Œ
     printf("good bye~!\n");
     return 0;
 }

@@ -10,6 +10,12 @@ void clean_recv()
         printf("recv : process will be turned off soon\n");
 }
 
+void clean_send()
+{
+        printf("\nsend : user shut down process\n");
+        printf("send : process will be turned off soon\n");
+}
+
 void* recv_msg(void* parameter)
 {
     Args* args = (Args*)parameter;
@@ -20,16 +26,18 @@ void* recv_msg(void* parameter)
     int length;
 
     pthread_cleanup_push(clean_recv,NULL);
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 
-    // º»°İÀûÀÎ ¼ö½ÅÀÛ¿ë
+    // ë³¸ê²©ì ì¸ ìˆ˜ì‹ ì‘ìš©
     while (1)
     {
-        if (user_down || (length = read(serv_socket, buffer, BUFFSIZE - 1)) <= 0)
+        if ( (length = read(serv_socket, buffer, BUFFSIZE - 1)) <= 0)
         {
             pthread_mutex_lock(&mtx);
-            if (length == 0 && !user_down) // ¿À·ù 2 : ¼­¹ö°¡ ´Ù¿îµÊ
+            if (length == 0) // ì˜¤ë¥˜ 2 : ì„œë²„ê°€ ë‹¤ìš´ë¨
             {
                 printf("\nrecv : your session with server has been disconnected!\n");
+                session_down = true;
                 *errCode = 2;
             }
             else if(user_down)
@@ -37,28 +45,26 @@ void* recv_msg(void* parameter)
                 printf("\nrecv : user shut down process\n");
                 *errCode = 1;
             }
-            else // ¿À·ù 3 : read ÇÔ¼öÀÇ ¿ÀÀÛµ¿ (´õ ±í°Ô »ìÆìºÁ¾ß ÇÒ ¿À·ù)
+            else // ì˜¤ë¥˜ 3 : read í•¨ìˆ˜ì˜ ì˜¤ì‘ë™ (ë” ê¹Šê²Œ ì‚´í´ë´ì•¼ í•  ì˜¤ë¥˜)
             {
                 printf("\nrecv : unknown error occurred while receiving!\n");
                 *errCode = 3;
             }
 
-            session_down = true;
             pthread_mutex_unlock(&mtx);
             break;
         }
 
         buffer[length] = '\0';
-        printf("\nrecv : %s", buffer); // Á¤»óÀÛµ¿
+        printf("\nrecv : %s", buffer); // ì •ìƒì‘ë™
     }
 
     pthread_cleanup_pop(1);
-    printf("recv : process will be turned off soon\n");
     pthread_exit(0);
     return NULL;
 }
 
-void* send_msg(void* parameter) // ¼ÒÄÏ½Äº°ÀÚ, ¿¡·¯ÄÚµå, id
+void* send_msg(void* parameter) // ì†Œì¼“ì‹ë³„ì, ì—ëŸ¬ì½”ë“œ, id
 {
         Args* args = (Args*)parameter;
         int serv_socket = args->serv_socket;
@@ -69,6 +75,9 @@ void* send_msg(void* parameter) // ¼ÒÄÏ½Äº°ÀÚ, ¿¡·¯ÄÚµå, id
         char msg[MSGSIZE] = { 0 };
         char packet[PACKSIZE] = { 0 }; // id + msg = packet
 
+        pthread_cleanup_push(clean_recv,NULL);
+        pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
+
         printf("user command list\n");
         printf("-q : quit from communication\n");
         printf("-t : terminate from shell\n");
@@ -76,27 +85,27 @@ void* send_msg(void* parameter) // ¼ÒÄÏ½Äº°ÀÚ, ¿¡·¯ÄÚµå, id
         while (1)
         {
                 printf("send : input[100] : ");
-                fgets(msg, MSGSIZE - 1, stdin); // ¸Ş½ÃÁö ÀÔ·Â¹Ş±â
-                msg[strcspn(msg, "\n")] = 0;    // °³Çà ¹®ÀÚ Á¦°Å
+                fgets(msg, MSGSIZE - 1, stdin); // ë©”ì‹œì§€ ì…ë ¥ë°›ê¸°
+                msg[strcspn(msg, "\n")] = 0;    // ê°œí–‰ ë¬¸ì ì œê±°
 
-                // Ä¿¸Çµå È®ÀÎ
-                if (!strcmp(msg, QUIT)) // À¯Àú°¡ ¹æ³ª°¡±â Ä¿¸Çµå¸¦ ÀÔ·ÂÇßÀ»½Ã
+                // ì»¤ë§¨ë“œ í™•ì¸
+                if (!strcmp(msg, QUIT)) // ìœ ì €ê°€ ë°©ë‚˜ê°€ê¸° ì»¤ë§¨ë“œë¥¼ ì…ë ¥í–ˆì„ì‹œ
                 {
                         pthread_mutex_lock(&mtx);
-                        printf("\nsend : you choose quit!\n"); // ¿À·ù 1 : À¯Àú°¡ ¸í·ÉÀ¸·Î Á÷Á¢ Åë½ÅÇÁ·Î¼¼½º Á¾·á
+                        printf("\nsend : you choose quit!\n"); // ì˜¤ë¥˜ 1 : ìœ ì €ê°€ ëª…ë ¹ìœ¼ë¡œ ì§ì ‘ í†µì‹ í”„ë¡œì„¸ìŠ¤ ì¢…ë£Œ
 
                         *errCode = 1;
-                        user_down = true; // join ÇÔ¼ö´Â mainÇÔ¼ö¾È¿¡ ÀÖ°í, ÇØ´ç ¿¡·¯ÄÚµå¸¦ º¸°í goto·Î ¼ÒÄÏ»ı¼ººÎºĞÀ¸·Î ÀÌµ¿
+                        user_down = true; // join í•¨ìˆ˜ëŠ” mainí•¨ìˆ˜ì•ˆì— ìˆê³ , í•´ë‹¹ ì—ëŸ¬ì½”ë“œë¥¼ ë³´ê³  gotoë¡œ ì†Œì¼“ìƒì„±ë¶€ë¶„ìœ¼ë¡œ ì´ë™
                         pthread_mutex_unlock(&mtx);
 
-                        if( !close(serv_socket)) // ÀÌ·¸°Ô µÇ¸é, recvµµ ¾ÈÀüÇÏ°Ô ²¨Áü -> ¸Ş¸ğ¸®´©¼ö X
+                        if( !close(serv_socket)) // ì´ë ‡ê²Œ ë˜ë©´, recvë„ ì•ˆì „í•˜ê²Œ êº¼ì§ -> ë©”ëª¨ë¦¬ëˆ„ìˆ˜ X
                                 printf("socket has been closed!\n");
                         break;
                 }
-                else if (!strcmp(msg, TERMINATE)) // À¯Àú°¡ ²¨¹ö¸®±â Ä¿¸Çµå¸¦ ÀÔ·ÂÇßÀ»½Ã
+                else if (!strcmp(msg, TERMINATE)) // ìœ ì €ê°€ êº¼ë²„ë¦¬ê¸° ì»¤ë§¨ë“œë¥¼ ì…ë ¥í–ˆì„ì‹œ
                 {
                         pthread_mutex_lock(&mtx);
-                        printf("\nsend :you choose terminate!\n"); // ¿À·ù 10 : À¯Àú°¡ ¸í·ÉÀ¸·Î Á÷Á¢ ½© Á¾·á
+                        printf("\nsend : you choose terminate!\n"); // ì˜¤ë¥˜ 10 : ìœ ì €ê°€ ëª…ë ¹ìœ¼ë¡œ ì§ì ‘ ì‰˜ ì¢…ë£Œ
 
                         *errCode = 10;
                         user_down = true;
@@ -106,7 +115,7 @@ void* send_msg(void* parameter) // ¼ÒÄÏ½Äº°ÀÚ, ¿¡·¯ÄÚµå, id
                         break;
                 }
                 pthread_mutex_lock(&mtx);
-                if (session_down && !user_down) // ¼­¹ö¿¡ ÀÇÇØ ²¨Áü
+                if (session_down && !user_down) // ì„œë²„ì— ì˜í•´ êº¼ì§
                 {
                         printf("\nsend : your session with server has been disconnected!\n");
                         pthread_mutex_unlock(&mtx);
@@ -114,14 +123,13 @@ void* send_msg(void* parameter) // ¼ÒÄÏ½Äº°ÀÚ, ¿¡·¯ÄÚµå, id
                 }
                 pthread_mutex_unlock(&mtx);
 
-                // ÆĞÅ¶ ±¸¼º
+                // íŒ¨í‚· êµ¬ì„±
                 sprintf(packet, "[%s] : %s\n", id, msg);
 
-
-                // ÆĞÅ¶ Àü¼Û
+                // íŒ¨í‚· ì „ì†¡
                 if (write(serv_socket, packet, strlen(packet) + 1) < 0)
                 {
-                        printf("send : there is a problem with sending packet!\n"); // ¿À·ù 4 : Á¦´ë·Î ÆĞÅ¶ Àü¼Û¸øÇÔ
+                        printf("send : there is a problem with sending packet!\n"); // ì˜¤ë¥˜ 4 : ì œëŒ€ë¡œ íŒ¨í‚· ì „ì†¡ëª»í•¨
                         pthread_mutex_lock(&mtx);
                         *errCode = 4;
                         session_down = true;
@@ -130,7 +138,7 @@ void* send_msg(void* parameter) // ¼ÒÄÏ½Äº°ÀÚ, ¿¡·¯ÄÚµå, id
                 }
         }
 
-        printf("send : process will be turned off soon\n");
+        pthread_cleanup_pop(1);
         pthread_exit(0);
         return NULL;
 }

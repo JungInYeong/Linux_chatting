@@ -13,24 +13,24 @@ CFLAGS = -lpthread
 
 # 실행파일 만들기
 $(clnt_out) : $(OBJS)
-        $(CC) $(CFLAGS) $(OBJS) -o $@
-        rm *.o
+	$(CC) $(CFLAGS) $(OBJS) -o $@
+	rm *.o
 
 # obj 파일만들기
 clnt_shell.o : clnt_shell2.c
-        $(CC) $(CFLAGS) -c clnt_shell2.c
+	$(CC) $(CFLAGS) -c clnt_shell2.c
 
 clnt_commu.o : clnt_commu.c
-        $(CC) $(CFLAGS) -c clnt_commu.c
+	$(CC) $(CFLAGS) -c clnt_commu.c
 
 clnt_socket.o : clnt_socket.c
-        $(CC) $(CFLAGS) -c clnt_socket.c
+	$(CC) $(CFLAGS) -c clnt_socket.c
 
 clean_o :
-        rm *.o
+	rm *.o
 
 clean_out : 
-        rm *.out
+	rm *.out
 
 test : 
-        echo makefile_OK
+	echo makefile_OK

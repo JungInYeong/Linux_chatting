@@ -1,20 +1,20 @@
 #include"serv.h"
 
-#ifdef DEBUG // µğ¹ö±×¿ë
+#ifdef DEBUG // ë””ë²„ê·¸ìš©
 
 #define INFOSIZE 42
-// txt ÆÄÀÏ¿¡ id pw À¸·Î ÀúÀåµÊ
+// txt íŒŒì¼ì— id pw ìœ¼ë¡œ ì €ì¥ë¨
 
-void login_ID(int clnt_socket, char packet[])
-// txt ÆÄÀÏ¿¡¼­ ID°¡ ÀÖ´ÂÁö È®ÀÎ
+void login_ID(int clnt_socket, char packet[]) 
+// txt íŒŒì¼ì—ì„œ IDê°€ ìˆëŠ”ì§€ í™•ì¸ 
 {
     FILE* fp;
     char info[INFOSIZE] = { 0 };
-    char clnt_id[IDSIZE] = { 0 };   // ·Î±×ÀÎ ¿äÃ» Å¬¶óÀÌ¾ğÆ® ¾ÆÀÌµğ
-    char temp_id[IDSIZE] = { 0 };   // txt ÆÄÀÏ¿¡¼­ÀÇ ¾ÆÀÌµğ ¸ñ·Ï
+    char clnt_id[IDSIZE] = { 0 };   // ë¡œê·¸ì¸ ìš”ì²­ í´ë¼ì´ì–¸íŠ¸ ì•„ì´ë””
+    char temp_id[IDSIZE] = { 0 };   // txt íŒŒì¼ì—ì„œì˜ ì•„ì´ë”” ëª©ë¡
     int seek_result = 0;
 
-    // 1. ÆÄÀÏ¿­±â
+    // 1. íŒŒì¼ì—´ê¸°
 
     fp = fopen("testDB.txt","r");
 
@@ -24,25 +24,25 @@ void login_ID(int clnt_socket, char packet[])
         return;
     }
 
-    // 2. ÆĞÅ¶¿¡¼­ id ÃßÃâ
-    for(int idx = 3; packet[idx] != '\0'; idx++)
-    // ¾ÆÀÌµğ ·Î±×ÀÎ ÇÁ·Î¼¼½º ÆĞÅ¶±¸¼º -> id sungsu
+    // 2. íŒ¨í‚·ì—ì„œ id ì¶”ì¶œ
+    for(int idx = 3; packet[idx] != '\0'; idx++) 
+    // ì•„ì´ë”” ë¡œê·¸ì¸ í”„ë¡œì„¸ìŠ¤ íŒ¨í‚·êµ¬ì„± -> id sungsu
     {
         clnt_id[idx-3] = packet[idx];
     }
 
-    // 3. txt¿¡¼­ ÇÑÁÙ¾¿ ÀĞ°í ±× id¿Í ¼ö½Å¹ŞÀº id¸¦ °Ë»ç
+    // 3. txtì—ì„œ í•œì¤„ì”© ì½ê³  ê·¸ idì™€ ìˆ˜ì‹ ë°›ì€ idë¥¼ ê²€ì‚¬
     int str_cursor;
 
-    while(fgets(info, sizeof(info), fp) != NULL)
-    // ÆÄÀÏÀ» ÇÑÁÙ¾¿ EOF±îÁö ÀĞ¾î¼­ °Å±â¼­ id¸¸ ÃßÃâÇØ¼­ °Ë»ç
+    while(fgets(info, sizeof(info), fp) != NULL) 
+    // íŒŒì¼ì„ í•œì¤„ì”© EOFê¹Œì§€ ì½ì–´ì„œ ê±°ê¸°ì„œ idë§Œ ì¶”ì¶œí•´ì„œ ê²€ì‚¬
     {
-        memset(temp_id, 0, sizeof(temp_id)); // ÃÊ±âÈ­
+        memset(temp_id, 0, sizeof(temp_id)); // ì´ˆê¸°í™”
 
-        for(str_cursor = 0; info[str_cursor] != ' '; str_cursor++)
+        for(str_cursor = 0; info[str_cursor] != ' '; str_cursor++) 
         {
             temp_id[str_cursor] = info[str_cursor];
-            // ±× ÇÑÁÙ¿¡¼­ id¸¸ ÃßÃâ
+            // ê·¸ í•œì¤„ì—ì„œ idë§Œ ì¶”ì¶œ
         }
         temp_id[str_cursor] = '\0';
 
@@ -53,23 +53,23 @@ void login_ID(int clnt_socket, char packet[])
             break;
         }
     }
-
-    // 4. ÇØ´ç°á°ú¸¦ Å¬¶ó¿¡°Ô ¹İÈ¯
+    
+    // 4. í•´ë‹¹ê²°ê³¼ë¥¼ í´ë¼ì—ê²Œ ë°˜í™˜
     write(clnt_socket, &seek_result, sizeof(int));
 
     fclose(fp);
 }
 
-void login_PW(int clnt_socket, char packet[])
-/* --- ±×³É Å¬¶óÀÌ¾ğÆ®°¡ ID¿Í PW¸¦ Àü¼ÛÇÏ°Ô ÇÏÀÚ ¾È±×·¯¸é ³Ê¹« º¹Àâ --- */
-/* --- »ı°¢ÇØº¸´Ï Å¬¶ó°¡ ID¿Í PW¿¡ ¶ç¾î¾²±â¸¦ ³ÖÀ¸¸é ¾ÈµÊ --- */
+void login_PW(int clnt_socket, char packet[]) 
+/* --- ê·¸ëƒ¥ í´ë¼ì´ì–¸íŠ¸ê°€ IDì™€ PWë¥¼ ì „ì†¡í•˜ê²Œ í•˜ì ì•ˆê·¸ëŸ¬ë©´ ë„ˆë¬´ ë³µì¡ --- */
+/* --- ìƒê°í•´ë³´ë‹ˆ í´ë¼ê°€ IDì™€ PWì— ë„ì–´ì“°ê¸°ë¥¼ ë„£ìœ¼ë©´ ì•ˆë¨ --- */
 {
     FILE* fp;
     char info[INFOSIZE] = { 0 };
     char clnt_account[INFOSIZE] = {0};
     int seek_result = 0;
 
-    // 1. ÆÄÀÏ¿­±â
+    // 1. íŒŒì¼ì—´ê¸°
 
     fp = fopen("testDB.txt","r");
 
@@ -79,21 +79,21 @@ void login_PW(int clnt_socket, char packet[])
         return;
     }
 
-    // 2. ÆĞÅ¶¿¡¼­ id¿Í pw¸¸ ÃßÃâ
-
+    // 2. íŒ¨í‚·ì—ì„œ idì™€ pwë§Œ ì¶”ì¶œ
+    
     int idx;
     for( idx = 3; idx < strlen(packet);idx++)
     {
-        clnt_account[idx-3] = packet[idx];
+	clnt_account[idx-3] = packet[idx];
     }
     clnt_account[idx] = 0;
 
-    // 3. txt¿¡¼­ ÇÑÁÙ¾¿ ÀĞ°í ÆĞÅ¶ÀÚÃ¼¿Í ±× ÇÑÁÙÀ» °Ë»ç
+    // 3. txtì—ì„œ í•œì¤„ì”© ì½ê³  íŒ¨í‚·ìì²´ì™€ ê·¸ í•œì¤„ì„ ê²€ì‚¬
 
-    while(fgets(info, sizeof(info), fp) != NULL)
-    // ÆĞÅ¶±¸¼º -> "id" "pw" == "id" "pw" (txtÀÇ ÇÑÁÙ)
+    while(fgets(info, sizeof(info), fp) != NULL) 
+    // íŒ¨í‚·êµ¬ì„± -> "id" "pw" == "id" "pw" (txtì˜ í•œì¤„)
     {
-        info[strcspn(info, "\n")] = 0; // °³Çà¹®ÀÚ Á¦°Å
+        info[strcspn(info, "\n")] = 0; // ê°œí–‰ë¬¸ì ì œê±°
 
         if(!strcmp(info,clnt_account))
         {
@@ -103,7 +103,7 @@ void login_PW(int clnt_socket, char packet[])
         }
     }
 
-    // 4. ÇØ´ç°á°ú¸¦ Å¬¶ó¿¡°Ô ¹İÈ¯
+    // 4. í•´ë‹¹ê²°ê³¼ë¥¼ í´ë¼ì—ê²Œ ë°˜í™˜
 
     write(clnt_socket, &seek_result, sizeof(int));
 
@@ -114,11 +114,11 @@ void unique_ID(int clnt_socket, char packet[])
 {
     FILE* fp;
     char info[INFOSIZE] = { 0 };
-    char clnt_id[IDSIZE] = { 0 };   // ·Î±×ÀÎ ¿äÃ» Å¬¶óÀÌ¾ğÆ® ¾ÆÀÌµğ
-    char temp_id[IDSIZE] = { 0 };   // txt ÆÄÀÏ¿¡¼­ÀÇ ¾ÆÀÌµğ ¸ñ·Ï
-    int seek_result = 1;            // ±âº»ÀûÀ¸·Î À¯´ÏÅ©ÇÏ´Ù°í °¡Á¤
+    char clnt_id[IDSIZE] = { 0 };   // ë¡œê·¸ì¸ ìš”ì²­ í´ë¼ì´ì–¸íŠ¸ ì•„ì´ë””
+    char temp_id[IDSIZE] = { 0 };   // txt íŒŒì¼ì—ì„œì˜ ì•„ì´ë”” ëª©ë¡
+    int seek_result = 1;            // ê¸°ë³¸ì ìœ¼ë¡œ ìœ ë‹ˆí¬í•˜ë‹¤ê³  ê°€ì •
 
-    // 1. ÆÄÀÏ¿­±â
+    // 1. íŒŒì¼ì—´ê¸°
 
     fp = fopen("testDB.txt","r");
 
@@ -128,43 +128,43 @@ void unique_ID(int clnt_socket, char packet[])
         return;
     }
 
-    // 2. ÆĞÅ¶¿¡¼­ id ÃßÃâ
-    for(int idx = 3; packet[idx] != '\0'; idx++)
-    // ¾ÆÀÌµğ °íÀ¯È®ÀÎ ÇÁ·Î¼¼½º ÆĞÅ¶±¸¼º -> id sungsu
+    // 2. íŒ¨í‚·ì—ì„œ id ì¶”ì¶œ
+    for(int idx = 3; packet[idx] != '\0'; idx++) 
+    // ì•„ì´ë”” ê³ ìœ í™•ì¸ í”„ë¡œì„¸ìŠ¤ íŒ¨í‚·êµ¬ì„± -> id sungsu
     {
         clnt_id[idx-3] = packet[idx];
     }
-    clnt_id[strlen(packet) - 3] = '\0'; // clnt_id¸¦ ³¡³»ÁÙ°Í
+    clnt_id[strlen(packet) - 3] = '\0'; // clnt_idë¥¼ ëë‚´ì¤„ê²ƒ
 
-    // 3. txt¿¡¼­ ÇÑÁÙ¾¿ ÀĞ°í ±× id¿Í ¼ö½Å¹ŞÀº id¸¦ °Ë»ç
+    // 3. txtì—ì„œ í•œì¤„ì”© ì½ê³  ê·¸ idì™€ ìˆ˜ì‹ ë°›ì€ idë¥¼ ê²€ì‚¬
     int str_cursor;
 
-    while(fgets(info, sizeof(info), fp) != NULL)
-    // ÆÄÀÏÀ» ÇÑÁÙ¾¿ EOF±îÁö ÀĞ¾î¼­ °Å±â¼­ id¸¸ ÃßÃâÇØ¼­ °Ë»ç
+    while(fgets(info, sizeof(info), fp) != NULL) 
+    // íŒŒì¼ì„ í•œì¤„ì”© EOFê¹Œì§€ ì½ì–´ì„œ ê±°ê¸°ì„œ idë§Œ ì¶”ì¶œí•´ì„œ ê²€ì‚¬
     {
-        memset(temp_id, 0, sizeof(temp_id)); // ÃÊ±âÈ­
+        memset(temp_id, 0, sizeof(temp_id)); // ì´ˆê¸°í™”
 
-        for(str_cursor = 0; info[str_cursor] != ' '; str_cursor++)
+        for(str_cursor = 0; info[str_cursor] != ' '; str_cursor++) 
         {
             temp_id[str_cursor] = info[str_cursor];
-            // ±× ÇÑÁÙ¿¡¼­ id¸¸ ÃßÃâ
+            // ê·¸ í•œì¤„ì—ì„œ idë§Œ ì¶”ì¶œ
         }
         temp_id[str_cursor] = '\0';
-        /*µğ¹ö±×¿ë*/
-        printf("temp_id : %s\n",temp_id);
+	/*ë””ë²„ê·¸ìš©*/
+	printf("temp_id : %s\n",temp_id);
 
         if(!strcmp(temp_id,clnt_id))
         {
             printf("[%d]'s new ID [%s] is NOT Unique!\n",clnt_socket,clnt_id);
             seek_result = 0;
         }
-
+	
     }
 
     if(seek_result == 1)
-        printf("[%d]'s new ID [%s] is Unique!\n",clnt_socket,clnt_id);
+    	printf("[%d]'s new ID [%s] is Unique!\n",clnt_socket,clnt_id);
 
-    // 4. ÇØ´ç°á°ú¸¦ Å¬¶ó¿¡°Ô ¹İÈ¯
+    // 4. í•´ë‹¹ê²°ê³¼ë¥¼ í´ë¼ì—ê²Œ ë°˜í™˜
     write(clnt_socket, &seek_result, sizeof(int));
 
     fclose(fp);
@@ -176,7 +176,7 @@ void save_Info(int clnt_socket, char packet[])
     char info[INFOSIZE] = {0};
     int result = 0;
 
-    // 1. ÆÄÀÏ¿­±â
+    // 1. íŒŒì¼ì—´ê¸°
     fp = fopen("testDB.txt","a");
     if(fp == NULL)
     {
@@ -184,27 +184,27 @@ void save_Info(int clnt_socket, char packet[])
         return;
     }
 
-    // 2. ÆĞÅ¶¿¡¼­ Á¤º¸¸¸ ÃßÃâ
+    // 2. íŒ¨í‚·ì—ì„œ ì •ë³´ë§Œ ì¶”ì¶œ
     int idx;
     for(idx = 4; packet[idx] != '\0'; idx++)
-    // ÆĞÅ¶±¸Á¶ -> new "ID" "PW"
+    // íŒ¨í‚·êµ¬ì¡° -> new "ID" "PW"
     {
         info[idx-4] = packet[idx];
     }
     info[idx-4] = '\0';
 
-    // 3. °èÁ¤Á¤º¸ ¾²±â
+    // 3. ê³„ì •ì •ë³´ ì“°ê¸°
     fprintf(fp, "%s\n", info);
     printf("[%d]'s account info has been written at DB!\n",clnt_socket);
-
-    // 4. ÀÛ¼ºµÇ¾ú´Ù°í ¾Ë¸®±â
+    
+    // 4. ì‘ì„±ë˜ì—ˆë‹¤ê³  ì•Œë¦¬ê¸°
     write(clnt_socket, &result, sizeof(int));
 
     fclose(fp);
 }
 
-#else // ¸±¸®½º¿ë
+#else // ë¦´ë¦¬ìŠ¤ìš©
 
-// Á¤ÀÎ¿µÀÌ Ã¤¿ï°Í
+// ì •ì¸ì˜ì´ ì±„ìš¸ê²ƒ
 
 #endif

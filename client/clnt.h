@@ -11,16 +11,16 @@
 #include <pthread.h>
 #include <stdbool.h>
 
-#define IDSIZE 21               // id ÃÖ´ë ¹®ÀÚ¿­ ±æÀÌ 20
-#define DBPKSIZE 46             // id + pw + ¸¶Áø -> È¸¿ø°¡ÀÔ¿ë
+#define IDSIZE 21		// id ìµœëŒ€ ë¬¸ìì—´ ê¸¸ì´ 20
+#define DBPKSIZE 46		// id + pw + ë§ˆì§„ -> íšŒì›ê°€ì…ìš©
 
-#define MSGSIZE 101             // ¹ß½Å ÀÔ·Â¿ë
-#define PACKSIZE 131            // ¹ß½Å¿ë
-#define BUFFSIZE 131            // ¼ö½Å¿ë
+#define MSGSIZE 101		// ë°œì‹  ì…ë ¥ìš©
+#define PACKSIZE 131		// ë°œì‹ ìš©
+#define BUFFSIZE 131		// ìˆ˜ì‹ ìš©
 
-#define PORT 7889               // ¼­¹ö·ÎÀÇ Åë·Î
+#define PORT 7889		// ì„œë²„ë¡œì˜ í†µë¡œ
 
-// Å¬¶óÀÌ¾ğÆ® ´Ü Ä¿¸Çµå
+// í´ë¼ì´ì–¸íŠ¸ ë‹¨ ì»¤ë§¨ë“œ
 #define QUIT "-q"
 #define TERMINATE "-t"
 
@@ -28,11 +28,11 @@ extern bool session_down;
 extern bool user_down;
 extern pthread_mutex_t mtx;
 
-typedef struct // ½º·¹µå µ¿ÀÛÇÔ¼ö¿¡ ³Ñ°ÜÁÙ ±¸Á¶Ã¼ (½º·¹µå µ¿ÀÛÇÔ¼ö´Â ÀÎÀÚ¸¦ ÇÏ³ª¹Û¿¡ ¸ø¹ŞÀ½)
+typedef struct // ìŠ¤ë ˆë“œ ë™ì‘í•¨ìˆ˜ì— ë„˜ê²¨ì¤„ êµ¬ì¡°ì²´ (ìŠ¤ë ˆë“œ ë™ì‘í•¨ìˆ˜ëŠ” ì¸ìë¥¼ í•˜ë‚˜ë°–ì— ëª»ë°›ìŒ)
 {
-        int serv_socket;
-        int* errCode;
-        char userID[IDSIZE];
+	int serv_socket;
+	int* errCode;
+	char userID[IDSIZE];
 }Args;
 
 
@@ -40,6 +40,7 @@ bool is_correctIP(char IP[], int length);
 bool login_process(int serv_socket, int* errCode, char* userID);
 bool signup_process(int serv_socket, int* errCode, char* userID);
 bool follow_rules(char input[]);
-void* recv_msg(void* parameter); // ¼ÒÄÏ½Äº°ÀÚ, ¿¡·¯ÄÚµå, id
-void* send_msg(void* parameter); // ¼ÒÄÏ½Äº°ÀÚ, ¿¡·¯ÄÚµå, id
-void clean_recv();              // thread_cancle À» À§ÇÑ Á¾·áÃâ·ÂÇÔ¼ö
+void* recv_msg(void* parameter); // ì†Œì¼“ì‹ë³„ì, ì—ëŸ¬ì½”ë“œ, id
+void* send_msg(void* parameter); // ì†Œì¼“ì‹ë³„ì, ì—ëŸ¬ì½”ë“œ, id
+void clean_recv();
+void clean_send(); // thread_cancel ì„ ìœ„í•œ ì¢…ë£Œì¶œë ¥í•¨ìˆ˜
