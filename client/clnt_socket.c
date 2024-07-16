@@ -55,17 +55,17 @@ bool login_process(int serv_socket, int* errCode, char* userID)
 		if (strcmp(inputID, "q") == 0 || strcmp(inputID, "Q") == 0)
 			// 오류 1 : 사용자가 포기하고 꺼버리는 경우
 		{
-			printf("\nquitting this sequence...\n");
+			printf("\n\033[0;31mSYS : quitting this sequence...\n\033[0m");
 			*errCode = 1;
 			return false;
 		}
 
 		sprintf(DBmsg, "ID %s", inputID);	// 채팅이 아니라면, 첫번째 문자가 [ 가 아니다
-		printf("\nthe server will verify that ID is correct\n");
+		printf("\n\033[0;31mSYS : the server will verify that ID is correct\n\033[0m");
 
 		if (write(serv_socket, DBmsg, strlen(DBmsg) + 1) < 0)// 서버에 ID 보내기
 		{
-			printf("there is a problem with sending ID process!\n"); // 오류 2 : 제대로 ID 전송못함
+			printf("\033[0;31mSYS : there is a problem with sending ID process!\n\033[0m"); // 오류 2 : 제대로 ID 전송못함
 			*errCode = 2;
 			return false; // 바로 꺼버리기
 		}
@@ -76,13 +76,13 @@ bool login_process(int serv_socket, int* errCode, char* userID)
 
 		if ((length = read(serv_socket, &IDsuccess, sizeof(int))) != sizeof(int)) // 제대로 수신받지 못함
 		{
-			printf("there is a problem with receiving result process!\n"); // 오류 3 : 제대로 ID 결과 수신못받음
+			printf("\033[0;31mSYS : there is a problem with receiving result process!\n\033[0m"); // 오류 3 : 제대로 ID 결과 수신못받음
 			*errCode = 3;
 			return false; // 바로 꺼버리기
 		}
 
 		if (!IDsuccess)
-			printf("Invalid ID, Try again\n");
+			printf("\033[0;31mSYS : Your ID is Invalid or already connected, Try again\n\033[0m");
 	}
 
 	// PW 확인
@@ -90,7 +90,7 @@ bool login_process(int serv_socket, int* errCode, char* userID)
 	while (!PWsuccess)
 	{
 		//system("clear");
-		printf("\n\nID is correct!\n\n");
+		printf("\033[0;32m\n\nID is correct!\n\n\033[0m");
 		memset(DBmsg, 0, DBPKSIZE);
 		memset(inputPW, 0, IDSIZE);
 		memset(inputPW2, 0, IDSIZE);
@@ -102,18 +102,18 @@ bool login_process(int serv_socket, int* errCode, char* userID)
 		if (strcmp(inputPW, "q") == 0 || strcmp(inputPW, "Q") == 0)
 			// 오류 1 : 사용자가 포기하고 꺼버리는 경우
 		{
-			printf("\nquitting this sequence...\n");
+			printf("\n\033[0;31mSYS : quitting this sequence...\n\033[0m");
 			*errCode = 1;
 			return false;
 		}
 
 		
 		sprintf(DBmsg, "PW %s %s", inputID, inputPW);
-		printf("\nthe server will verify that PW is correct\n");
+		printf("\n\033[0;32mthe server will verify that PW is correct\n\033[0m");
 
 		if (write(serv_socket, DBmsg, strlen(DBmsg) + 1) < 0) // 서버에 PW 보내기
 		{
-			printf("there is a problem with sending PW process!\n"); // 오류 4 : 제대로 PW 전송못함
+			printf("\033[0;31mSYS : there is a problem with sending PW process!\n\033[0m"); // 오류 4 : 제대로 PW 전송못함
 			*errCode = 4;
 			return false;
 		}
@@ -124,16 +124,18 @@ bool login_process(int serv_socket, int* errCode, char* userID)
 
 		if ((length = read(serv_socket, &PWsuccess, sizeof(int))) != sizeof(int)) // 제대로 수신받지 못함
 		{
-			printf("there is a problem with receiving PW result process!\n"); // 오류 5 : 제대로 PW 결과 수신못받음
+			printf("\033[0;31mSYS : there is a problem with receiving PW result process!\n\033[0m"); // 오류 5 : 제대로 PW 결과 수신못받음
 			*errCode = 5;
 			return false; // 바로 꺼버리기
 		}
 
 		if (!PWsuccess)
-			printf("Invalid PW, Try again\n");
+			printf("\033[0;31m");
+			printf("SYS : Invalid PW, Try again\n");
+			printf("\033[0m");
 	}
-
-	printf("PW is correct!\nmoving to chatting screen...\n");
+	
+	printf("\033[;32mPW is correct!\nmoving to chatting screen...\n\033[0m");
 
 	*errCode = 0;
 	strcpy(userID, inputID);
@@ -170,7 +172,7 @@ restart:
 		if (strcmp(inputID, "q") == 0 || strcmp(inputID, "Q") == 0)
 			// 오류 1 : 사용자가 포기하고 꺼버리는 경우
 		{
-			printf("\nquitting this sequence...\n");
+			printf("\n\033[0;31mSYS : quitting this sequence...\n\033[0m");
 			*errCode = 1;
 			return false;
 		}
@@ -185,12 +187,14 @@ restart:
 
 		if (ans == 'y' || ans == 'Y') // 사용자의 id가 결정됨
 		{
+			printf("\033[0;32m");
 			printf("your ID has been determined\n");
 			printf("the server will see if it is a unique id...\n");
+			printf("\033[0m");
 		}
 		else // 처음부터 다시
 		{
-			printf("try again!\n");
+			printf("\033[0;31mSYS : try again!\n\033[0m");
 			continue;
 		}
 
@@ -199,20 +203,20 @@ restart:
 
 		if (write(serv_socket, DBmsg, strlen(DBmsg) + 1) < 0) // 서버에 ID 보내기
 		{
-			printf("there is a problem with sending ID process!\n"); // 오류 6 : 제대로 ID 전송못함
+			printf("\033[0;31mSYS : there is a problem with sending ID process!\n\033[0m"); // 오류 6 : 제대로 ID 전송못함
 			*errCode = 6;
 			return false;
 		}
 
 		if ((length = read(serv_socket, &IDsuccess, sizeof(int))) != sizeof(int))
 		{
-			printf("there is a problem with receiving result process!\n"); // 오류 7 : ID가 고유한지 제대로 수신받지 못함
+			printf("\033[0;31mSYS : there is a problem with receiving result process!\n\033[0m"); // 오류 7 : ID가 고유한지 제대로 수신받지 못함
 			*errCode = 7;
 			return false;
 		}
 
 		if (!IDsuccess)
-			printf("ID already exists, try again\n");
+			printf("\033[0;31mSYS : ID already exists, try again\n\033[0m");
 
 		// 여기서 id가 서버에 입력되는 것이 아닌, pw까지 입력받고, 한번에 합쳐서 서버에 전송된다.
 		// 현재는 그냥 id가 고유한지 확인할 뿐이다.
@@ -236,7 +240,7 @@ restart:
 		if (strcmp(inputPW, "q") == 0 || strcmp(inputPW, "Q") == 0)
 			// 오류 1 : 사용자가 포기하고 꺼버리는 경우
 		{
-			printf("\nquitting this sequence...\n");
+			printf("\n\033[0;31mSYS : quitting this sequence...\n\033[0m");
 			*errCode = 1;
 			return false;
 		}
@@ -252,30 +256,30 @@ restart:
             		continue;
 
 		if (strcmp(inputPW, inputPW2)) // 두개가 같은지 확인
-			printf("\nyour passwords do not match, try again\n");
+			printf("\n\033[0;31mSYS : your passwords do not match, try again\n\033[0m");
 		else
 		{
-			printf("\nyour passwords match\n");
+			printf("\n\033[0;32myour passwords match\n\033[0m");
 			PWsuccess = 1;
 		}
 	}
 
 	// 중간에 사용자가 꺼버릴수도 있기 때문에, ID와 비번을 합쳐서 서버에 전송
-	printf("sending the account information to the server...\n");
+	printf("\033[0;32msending the account information to the server...\n\033[0m");
 
 	memset(DBmsg, 0, DBPKSIZE);
 	sprintf(DBmsg, "new %s %s", inputID, inputPW);
 
 	if (write(serv_socket, DBmsg, strlen(DBmsg) + 1) < 0) // 서버에 계정정보 보내기
 	{
-		printf("there was a problem sending account information\n"); // 오류 8 : 제대로 계정정보 전송못함
+		printf("\033[0;31mSYS : there was a problem sending account information\n\033[0m"); // 오류 8 : 제대로 계정정보 전송못함
 		*errCode = 8;
 		return false;
 	}
 
 	if ((length = read(serv_socket, &Savesuccess, sizeof(int))) != sizeof(int))
 	{
-		printf("the server encountered a problem saving the account\n"); // 서버에서 제대로 저장을 못했을 때,
+		printf("\033[0;31mthe server encountered a problem saving the account\033[0m\n"); // 서버에서 제대로 저장을 못했을 때,
 		printf("wanna restart sign_up process? [y/n] : ");
 		scanf("%c", &ans);
 		while (getchar() != '\n');
@@ -309,7 +313,7 @@ bool follow_rules(char input[])
     // 1. 글자수가 7이상일것
     if(strlen(input) < 7)
     {
-        printf("please enter more than 7 characters, try again!\n");
+        printf("\033[0;31mSYS : please enter more than 7 characters, try again!\n\033[0m");
         return false;
     }
 
@@ -318,7 +322,7 @@ bool follow_rules(char input[])
     {
         if(input[i] == ' ')
         {
-            printf("when entering, do not use space, try again!\n");
+            printf("\033[0;31mSYS : when entering, do not use space, try again!\n\033[0m");
             return false;
         }
     }

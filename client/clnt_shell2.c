@@ -17,6 +17,7 @@ int main(int argsNum, char *args[])
     int DB_Err = 0;
     int choose;
     char userID[IDSIZE];
+    int serverAccepted = 0;
     pthread_t recv_thread;
     pthread_t send_thread;
     Args send_args = { 0, NULL, {0}}; // 스레드 동작함수에 넘길 파라미터
@@ -34,7 +35,7 @@ int main(int argsNum, char *args[])
 
         if(!is_correctIP(serv_ip, strlen(serv_ip)))
         {
-                printf("Input server IP address correctly!\n");
+                printf("\033[0;32mInput server IP address correctly!\n\033[0m");
                 return 0;
         }
         else
@@ -51,12 +52,12 @@ return_menu:
     serv_addr.sin_addr.s_addr = inet_addr(serv_ip);
     serv_addr.sin_port = htons(PORT);
 
-    printf("socket is creating for server...\n");
+    printf("\033[0;32msocket is creating for server...\n\033[0m");
 
     serv_socket = socket(PF_INET, SOCK_STREAM, 0); // TCP용
     if (serv_socket == -1)
     {
-        printf("socket creation error!\n");
+        printf("\033[0;31msocket creation error!\n\033[0m");
         return 0;
     }
 
@@ -64,15 +65,35 @@ return_menu:
     // 3. connect 절차
     /*-------------------------------------*/
 
-    printf("socket is trying to connect with server...\n");
+    printf("\033[0;32msocket is trying to connect with server...\n\033[0m");
 
     if (connect(serv_socket, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1)
     {
-        printf("connection error!\n");
-        return 0;
+	    printf("\033[0;31mconnection error!\n\033[0m");
+	    return 0;
     }
     else
-        printf("connecting success!\n");
+    {
+	    printf("\033[0;31mSYS : connecting completed, but server not Accepted!\n\033[0m");
+	    printf("\033[0;31mSYS : waiting for server answer...\n\033[0m");
+	    int length = read(serv_socket,&serverAccepted,sizeof(int));
+	    if(length > 0)
+        	{
+                	if(serverAccepted) // 서버로부터 연결을 승인받음
+                        	printf("\033[0;32mSYS : server Allowed connection!\n\033[0m");
+			else // 수신오류
+                	{
+				printf("\033[0;31mSYS : read Err!\n\033[0m");
+				return 0;
+                	}
+        	}
+	    else 
+	    {
+		    printf("\033[0;31mSYS : server closed the connection\n\033[0m");
+		    return 0;
+	    }
+    }
+    printf("\033[0;32mconnecting success!\n\033[0m");
 
     /*-------------------------------------*/
     // 4. 메인메뉴 화면 띄우기
@@ -112,7 +133,7 @@ return_menu:
             break;
 
         default:
-            printf("incorrect input, try again\n");
+            printf("\033[0;31mincorrect input, try again\n\033[0m");
             break;
         }
 
