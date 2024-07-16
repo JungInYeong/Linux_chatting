@@ -1,60 +1,78 @@
+// serv_commu.c
 #include "serv.h"
 
+extern char clnt_idList[CLNT_MAX][IDSIZE]; // 클라이언트들의 id 저장
+extern pthread_t clnt_threadList[CLNT_MAX]; // 클라이언트들과의 통신스레드 식별자들 저장
 extern int clnt_socketList[CLNT_MAX];   // 클라이언트와의 1:1 소켓 식별자들 저장
-extern int clnt_cnt;                    // 임시로 받을 클라소켓 식별자
+extern int clnt_cnt;                    // 현 클라수
 extern pthread_mutex_t mtx;
 extern bool server_down;
-extern pthread_t clnt_threadList[CLNT_MAX];
+
 
 void cleanup_handler(void *arg)
 {
     int clnt_socket = *(int *)arg;
-    printf("clean_up process!\n"); 
+    printf("clean_up process!\n");
 
     if(pthread_mutex_trylock(&mtx) == 0) // 뮤텍스락이 안잠김 -> 그래서 함수에서 잠가줌
     {
-    	for(int i =0; i < clnt_cnt; i++) // 소켓리스트와 스레드리스트 앞으로 땡기기
-    	{
-        	if(clnt_socketList[i] == clnt_socket)
-        	{
-            		//printf("founded!!\n");
-            		for(; i < clnt_cnt -1; i++)
-            		{
-                		clnt_socketList[i] = clnt_socketList[i+1];
-                		clnt_threadList[i] = clnt_threadList[i+1];
-            		}
-            		break;
-        	}
-    	}
+        for(int i =0; i < clnt_cnt; i++) // 소켓리스트와 스레드리스트 앞으로 땡기기
+        {
+                if(clnt_socketList[i] == clnt_socket)
+                {
+			//printf("founded!! -> %d, %d\n",clnt_cnt,clnt_socket);
+                        for(; i < clnt_cnt -1; i++)
+                        {	
+				//printf("%d, %d, %s\t",clnt_cnt,clnt_socketList[i],clnt_idList[i]);
+                                clnt_socketList[i] = clnt_socketList[i+1];
+                                clnt_threadList[i] = clnt_threadList[i+1];
+                                strcpy(clnt_idList[i] , clnt_idList[i+1]);
+                        }
+                        break;
+                }
+        }
+        // 접종전의 유저 정보 인덱스를 초기화
+        clnt_socketList[clnt_cnt-1] = 0;
+        memset(&clnt_threadList[clnt_cnt-1], 0, sizeof(pthread_t));
+        memset(clnt_idList[clnt_cnt-1], 0, IDSIZE);
 	
-	clnt_cnt --; // 현 접속자수-1
-	pthread_mutex_unlock(&mtx);
+	printf("clnt_cnt : %d\n",clnt_cnt);
+        clnt_cnt --; // 현 접속자수-1
+        pthread_mutex_unlock(&mtx);
 
-    	close(clnt_socket); // 소켓닫기
-    	printf("socket [%d] closed!\n",clnt_socket);
+        close(clnt_socket); // 소켓닫기
+        printf("socket [%d] closed!\n",clnt_socket);
     }
 
     else // 뮤텍스락이 잠겨있음 이미
     {
 
-    	for(int i =0; i < clnt_cnt; i++) // 소켓리스트와 스레드리스트 앞으로 땡기기
-    	{
-        	if(clnt_socketList[i] == clnt_socket)
-        	{
-            		//printf("founded!!\n");
-            		for(; i < clnt_cnt -1; i++)
-            		{
-                		clnt_socketList[i] = clnt_socketList[i+1];
-                		clnt_threadList[i] = clnt_threadList[i+1];
-            		}
-            	break;
-        	}
-    	}
+        for(int i =0; i < clnt_cnt; i++) // 소켓리스트와 스레드리스트 앞으로 땡기기
+        {
+                if(clnt_socketList[i] == clnt_socket)
+                {
+                        //printf("founded!! -> %d, %d\n",clnt_cnt,clnt_socket);
+                        for(; i < clnt_cnt -1; i++)
+                        {
+				//printf("%d, %d, %s\t",clnt_cnt,clnt_socketList[i],clnt_idList[i]);
+                                clnt_socketList[i] = clnt_socketList[i+1];
+                                clnt_threadList[i] = clnt_threadList[i+1];
+				strcpy(clnt_idList[i] , clnt_idList[i+1]);
+                        }
+                break;
+                }
+        }
 
-    	clnt_cnt --; // 현 접속자수-1
+        // 접종전의 유저 정보 인덱스를 초기화
+        clnt_socketList[clnt_cnt-1] = 0;
+        memset(&clnt_threadList[clnt_cnt-1], 0, sizeof(pthread_t));
+       	memset(clnt_idList[clnt_cnt-1], 0, IDSIZE);
 
-    	close(clnt_socket);     // 소켓닫기
-    	printf("socket [%d] closed!\n",clnt_socket);
+	printf("clnt_cnt : %d\n",clnt_cnt);
+        clnt_cnt --; // 현 접속자수-1
+
+        close(clnt_socket);     // 소켓닫기
+        printf("socket [%d] closed!\n",clnt_socket);
     }
 }
 
@@ -62,11 +80,11 @@ void* clnt_handler(void *arg)
 {
     int clnt_socket = *(int*)arg;
     char buffer[BUFFSIZE] = {0};
-    char clnt_id[IDSIZE] = {0};
+    char clnt_id[IDSIZE] = {0};               // 클라이언트 전역배열의 인덱스 번호
     int length = 0;
     bool haveID = false;
-    
-    pthread_cleanup_push(cleanup_handler, (void*) &clnt_socket); 
+
+    pthread_cleanup_push(cleanup_handler, (void*) &clnt_socket);
     pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 
     while(1)
@@ -112,12 +130,9 @@ void* clnt_handler(void *arg)
                     break;
             }
 
-            if(!haveID && buffer[0] == '[')
-            // 고려사항 4 : id가 추출되었는가?
-            {
-                extractID(clnt_id, buffer);
-                haveID = true;
-            }
+            if(!haveID)
+            // 고려사항 4 : id를 아는가?
+                haveID = extractID(clnt_id, clnt_socket);
         }
     }
 
@@ -157,15 +172,28 @@ void send_all_clnt(char *buffer, int from_clnt_socket, bool is_alarm)
     }
 }
 
-void extractID(char clnt_id[],char buffer[])
+bool extractID(char *clnt_id, int clnt_socket)
 {
-    int idx;
-
-    for(idx = 0; buffer[idx+1] != ']'; idx++) // [] 사이의 글자가 곧 id 이다.
-        clnt_id[idx] = buffer[idx+1];
-
-    clnt_id[idx] = '\0'; // 널추가
-    return;
+    pthread_mutex_lock(&mtx);
+    for(int idx = 0; idx < clnt_cnt; idx++) // 똑같은 사람이면, 모든 전역배열의 정보인덱스는 같다
+    {
+        if(clnt_socketList[idx] == clnt_socket)
+        {
+            if(clnt_idList[idx][0] == '\0') // 아직 id가 안들어왔으면
+            {
+                pthread_mutex_unlock(&mtx);
+                return false;
+            }
+            else // 로그인을 해서 id가 있으면
+            {
+                strcpy(clnt_id, clnt_idList[idx]);
+                pthread_mutex_unlock(&mtx);
+                return true; // id 추출성공
+            }
+        }
+    }
+    pthread_mutex_unlock(&mtx);
+    return false;
 }
 
 void* input_cmd(void *Args)
@@ -173,13 +201,13 @@ void* input_cmd(void *Args)
     DATA *copiedDATA = Args;
     char command[CMDLEN] = {0};
     char msg[BUFFSIZE] = {0};
-    int selected_socket;    // kick 유저 고르기 
+    int selected_socket;    // kick 유저 고르기
 
     while(1)
     {
         fgets(command, CMDLEN-1, stdin);        // 커맨드 입력
         command[strcspn(command, "\n")] = 0;    // 개행 없애기
-        
+
         if(!strcmp(command, QUIT))              // 1. 서버 고의 다운 커맨드
         {
             //pthread_mutex_lock(&mtx);
@@ -207,7 +235,7 @@ void* input_cmd(void *Args)
             for(count = 0; count < clnt_cnt; count++)   // 입력한 디스크립터가 혀재 있는 사람들인가?
             {
                 if(selected_socket == clnt_socketList[count])
-                	break;
+                        break;
             }
 
             if(count == clnt_cnt) /*--- 3.1. 해당 디스크립터가 존재하는지 확인 -> 없음 ---*/
@@ -228,10 +256,10 @@ void* input_cmd(void *Args)
                     if(selected_socket == clnt_socketList[theClnt])
                     {
                         if(pthread_cancel(clnt_threadList[theClnt]) != 0)
-				perror("pthread_cancel err!\n");	// 해당클라와 연결하는 스레드 종료 -> 종료되면서, 소멸자(클린업핸들러) 실행됨
+                                perror("pthread_cancel err!\n");        // 해당클라와 연결하는 스레드 종료 -> 종료되면서, 소멸자(클린업핸들러) 실행됨
                         if (pthread_join(clnt_threadList[theClnt], NULL) != 0)   // 종료 기다리기
-				perror("pthread_join err!\n");
-			//break;
+                                perror("pthread_join err!\n");
+                        break;
                     }
                 }
                 pthread_mutex_unlock(&mtx);
@@ -245,13 +273,13 @@ void* input_cmd(void *Args)
             if(clnt_cnt > 0)
             {
                 for(int idx = 0; idx < clnt_cnt; idx++)
-                    printf("[%d] ", clnt_socketList[idx]);
-            
+                    printf("[%d, %s] ", clnt_socketList[idx], clnt_idList[idx]);
+
                 putchar('\n');
             }
             else
                 printf("No client\n");
-            
+
             pthread_mutex_unlock(&mtx);
         }
     }

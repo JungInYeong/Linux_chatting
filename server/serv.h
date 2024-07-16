@@ -1,3 +1,4 @@
+// serv.h
 #pragma once
 
 #include <stdio.h>
@@ -10,7 +11,6 @@
 #include <string.h>
 #include <pthread.h>
 #include <stdbool.h>
-
 
 #define PORT 7889
 #define CMDLEN 11
@@ -25,11 +25,12 @@
 #define KICK "-k"
 #define PRNT "-p"
 
+extern pthread_t clnt_threadList[CLNT_MAX];
+extern char clnt_idList[CLNT_MAX][IDSIZE];
 extern int clnt_socketList[CLNT_MAX];   // 클라이언트와의 1:1 소켓 식별자들 저장
 extern int clnt_cnt;                    // 임시로 받을 클라소켓 식별자
 extern pthread_mutex_t mtx;
 extern bool server_down;
-extern pthread_t clnt_threadList[CLNT_MAX];
 
 typedef struct 
 {
@@ -37,13 +38,14 @@ typedef struct
     int temp_List[CLNT_MAX];
 }DATA;
 
-
 void* clnt_handler(void *arg);
 void* input_cmd(void* Args);
 void* accept_connections(void * arg);
 void cleanup_handler(void *arg);
 void send_all_clnt(char *buffer, int from_clnt_socket, bool is_alarm);
-void extractID(char clnt_id[],char buffer[]);
+bool extractID(char *clnt_id, int clnt_socket);
+void add_idList(int clnt_socket, char clnt_id[]);
+void DB_extractID(char info[], char clnt_id[]);
 
 #define DEBUG // 디버그용
 #ifdef DEBUG // 디버그용 함수원형
