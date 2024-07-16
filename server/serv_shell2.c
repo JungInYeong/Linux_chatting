@@ -1,7 +1,9 @@
+// serv_shell.c
 #include "serv.h"
 
 int clnt_socketList[CLNT_MAX];
 pthread_t clnt_threadList[CLNT_MAX];
+char clnt_idList[CLNT_MAX][IDSIZE];
 int clnt_cnt = 0;
 pthread_mutex_t mtx;
 bool server_down = false;
@@ -57,7 +59,7 @@ int main()
     pthread_mutex_init(&mtx,NULL);
 
     //system("clear");
-    
+
     //printf("if you type '-q', server will be closed safely!\n\n");
 
     DATA copiedDATA = {0,{0}};
@@ -107,6 +109,7 @@ void* accept_connections(void * arg)
 
     while(1)
     {
+	sleep(2);
         pthread_mutex_lock(&mtx);
 
         if(clnt_cnt < CLNT_MAX)
@@ -120,23 +123,33 @@ void* accept_connections(void * arg)
                 continue;
             }
             else
-                printf("server and client[%d] are connected now!\n", clnt_socket);
+	    {
+		printf("server and client[%d] are connected now!\n", clnt_socket);
 
-            // 수신을 위한 스레드 만들기
-            pthread_mutex_lock(&mtx);
-            clnt_socketList[clnt_cnt] = clnt_socket;
-            pthread_create(&clnt_threadList[clnt_cnt++], NULL, clnt_handler, (void*) &clnt_socket);
-            pthread_mutex_unlock(&mtx);
+            	// 수신을 위한 스레드 만들기
+            	pthread_mutex_lock(&mtx);
+            	clnt_socketList[clnt_cnt] = clnt_socket;
+            	pthread_create(&clnt_threadList[clnt_cnt++], NULL, clnt_handler, (void*) &clnt_socket);
 
-            printf("Thread was made for the client[%d] right now\n", clnt_socket);
+		if(clnt_cnt == CLNT_MAX) printf("server now has the maximum number of people\n");
+            	pthread_mutex_unlock(&mtx);
+
+            	printf("Thread was made for the client[%d] right now\n", clnt_socket);
+		
+		int AcceptedMSG = 1;
+		if(write(clnt_socket,&AcceptedMSG,sizeof(int)))
+		       printf("Accepted message has been sent to this client!\n");	
+		// 대기열에서 벗어났고, 정상적으로 동작한다고 알림
+	    }
         }
-        else
+        else if(clnt_cnt > CLNT_MAX)
         {
             pthread_mutex_unlock(&mtx);
-            printf("we've reached the maximum number of people we can accommodate!\n");
-	    sleep(15);
+            printf("Additional Access denied!\n");
         }
+	else
+	    pthread_mutex_unlock(&mtx);
     }
-   
+
     pthread_exit(0);
 }
