@@ -6,14 +6,18 @@ extern pthread_mutex_t mtx;
 
 void clean_recv()
 {
-        printf("\nrecv : user shut down process\n");
-        printf("recv : process will be turned off soon\n");
+	printf("\033[0;31m");
+        printf("\nSYS : user shut down process\n");
+        printf("SYS : process will be turned off soon\n");
+	printf("\033[0m");
 }
 
 void clean_send()
 {
-        printf("\nsend : user shut down process\n");
-        printf("send : process will be turned off soon\n");
+	printf("\033[0;31m");
+        printf("\nSYS : user shut down process\n");
+        printf("SYS : process will be turned off soon\n");
+	printf("\033[0m");
 }
 
 void* recv_msg(void* parameter)
@@ -36,18 +40,18 @@ void* recv_msg(void* parameter)
             pthread_mutex_lock(&mtx);
             if (length == 0) // 오류 2 : 서버가 다운됨
             {
-                printf("\nrecv : your session with server has been disconnected!\n");
+                printf("\033[0;31m\nSYS : your session with server has been disconnected!\n\033[0m");
                 session_down = true;
                 *errCode = 2;
             }
             else if(user_down)
             {
-                printf("\nrecv : user shut down process\n");
+                printf("\033[0;31m\nSYS : user shut down process\n\033[0m");
                 *errCode = 1;
             }
             else // 오류 3 : read 함수의 오작동 (더 깊게 살펴봐야 할 오류)
             {
-                printf("\nrecv : unknown error occurred while receiving!\n");
+                printf("\033[0;31m\nSYS : unknown error occurred while receiving!\n\033[0m");
                 *errCode = 3;
             }
 
@@ -56,7 +60,7 @@ void* recv_msg(void* parameter)
         }
 
         buffer[length] = '\0';
-        printf("\nrecv : %s", buffer); // 정상작동
+        printf("\033[0;32m\n%s\033[0m", buffer); // 정상작동
     }
 
     pthread_cleanup_pop(1);
@@ -77,10 +81,12 @@ void* send_msg(void* parameter) // 소켓식별자, 에러코드, id
 
         pthread_cleanup_push(clean_recv,NULL);
         pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
-
-        printf("user command list\n");
+	
+	printf("\033[0;31m");
+        printf("SYS : user command list\n");
         printf("-q : quit from communication\n");
         printf("-t : terminate from shell\n");
+	printf("\033[0m");
 
         while (1)
         {
@@ -92,7 +98,7 @@ void* send_msg(void* parameter) // 소켓식별자, 에러코드, id
                 if (!strcmp(msg, QUIT)) // 유저가 방나가기 커맨드를 입력했을시
                 {
                         pthread_mutex_lock(&mtx);
-                        printf("\nsend : you choose quit!\n"); // 오류 1 : 유저가 명령으로 직접 통신프로세스 종료
+                        printf("\033[0;31m\nSYS : you choose quit!\n\033[0m"); // 오류 1 : 유저가 명령으로 직접 통신프로세스 종료
 
                         *errCode = 1;
                         user_down = true; // join 함수는 main함수안에 있고, 해당 에러코드를 보고 goto로 소켓생성부분으로 이동
@@ -105,7 +111,7 @@ void* send_msg(void* parameter) // 소켓식별자, 에러코드, id
                 else if (!strcmp(msg, TERMINATE)) // 유저가 꺼버리기 커맨드를 입력했을시
                 {
                         pthread_mutex_lock(&mtx);
-                        printf("\nsend : you choose terminate!\n"); // 오류 10 : 유저가 명령으로 직접 쉘 종료
+                        printf("\033[0;31m\nSYS : you choose terminate!\n\033[0m"); // 오류 10 : 유저가 명령으로 직접 쉘 종료
 
                         *errCode = 10;
                         user_down = true;
@@ -117,7 +123,7 @@ void* send_msg(void* parameter) // 소켓식별자, 에러코드, id
                 pthread_mutex_lock(&mtx);
                 if (session_down && !user_down) // 서버에 의해 꺼짐
                 {
-                        printf("\nsend : your session with server has been disconnected!\n");
+                        printf("\033[0;31m\nSYS : your session with server has been disconnected!\n\033[0m");
                         pthread_mutex_unlock(&mtx);
                         break;
                 }
@@ -129,7 +135,7 @@ void* send_msg(void* parameter) // 소켓식별자, 에러코드, id
                 // 패킷 전송
                 if (write(serv_socket, packet, strlen(packet) + 1) < 0)
                 {
-                        printf("send : there is a problem with sending packet!\n"); // 오류 4 : 제대로 패킷 전송못함
+                        printf("\033[0;31mSYS : there is a problem with sending packet!\n\033[0m"); // 오류 4 : 제대로 패킷 전송못함
                         pthread_mutex_lock(&mtx);
                         *errCode = 4;
                         session_down = true;
