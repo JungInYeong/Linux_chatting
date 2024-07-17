@@ -60,7 +60,7 @@ void* recv_msg(void* parameter)
         }
 
         buffer[length] = '\0';
-        printf("\033[0;32m\n%s\033[0m", buffer); // 정상작동
+        printf("\033[0;32m%s\033[0m\n", buffer); // 정상작동
     }
 
     pthread_cleanup_pop(1);
@@ -98,20 +98,20 @@ void* send_msg(void* parameter) // 소켓식별자, 에러코드, id
                 if (!strcmp(msg, QUIT)) // 유저가 방나가기 커맨드를 입력했을시
                 {
                         pthread_mutex_lock(&mtx);
-                        printf("\033[0;31m\nSYS : you choose quit!\n\033[0m"); // 오류 1 : 유저가 명령으로 직접 통신프로세스 종료
+                        printf("\033[0;31m\nSYS : you choose quit!\033[0m\n"); // 오류 1 : 유저가 명령으로 직접 통신프로세스 종료
 
                         *errCode = 1;
                         user_down = true; // join 함수는 main함수안에 있고, 해당 에러코드를 보고 goto로 소켓생성부분으로 이동
                         pthread_mutex_unlock(&mtx);
 
                         if( !close(serv_socket)) // 이렇게 되면, recv도 안전하게 꺼짐 -> 메모리누수 X
-                                printf("socket has been closed!\n");
+				
                         break;
                 }
                 else if (!strcmp(msg, TERMINATE)) // 유저가 꺼버리기 커맨드를 입력했을시
                 {
                         pthread_mutex_lock(&mtx);
-                        printf("\033[0;31m\nSYS : you choose terminate!\n\033[0m"); // 오류 10 : 유저가 명령으로 직접 쉘 종료
+                        printf("\n\033[0;31mSYS : you choose terminate!\033[0m\n"); // 오류 10 : 유저가 명령으로 직접 쉘 종료
 
                         *errCode = 10;
                         user_down = true;

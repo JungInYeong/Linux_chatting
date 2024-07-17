@@ -18,6 +18,10 @@ int main()
     struct sockaddr_in serv_addr; // 서버 자체의 주소정보 + 임시로 받을 클라의 주소정보
     pthread_t serv_thread ,cmd_thread ,accept_thread;
 
+    #ifdef DEBUG
+    #else
+    	system("service mysql restart");
+    #endif
     /*----------------------------------*/
     // 2. 소켓열기 + bind 과정
     /*----------------------------------*/
@@ -124,22 +128,23 @@ void* accept_connections(void * arg)
             }
             else
 	    {
-		printf("server and client[%d] are connected now!\n", clnt_socket);
+		    printf("server and client[%d] are connected now!\n", clnt_socket);
 
             	// 수신을 위한 스레드 만들기
             	pthread_mutex_lock(&mtx);
             	clnt_socketList[clnt_cnt] = clnt_socket;
             	pthread_create(&clnt_threadList[clnt_cnt++], NULL, clnt_handler, (void*) &clnt_socket);
 
-		if(clnt_cnt == CLNT_MAX) printf("server now has the maximum number of people\n");
+		        if(clnt_cnt == CLNT_MAX) printf("server now has the maximum number of people\n");
             	pthread_mutex_unlock(&mtx);
 
             	printf("Thread was made for the client[%d] right now\n", clnt_socket);
 		
-		int AcceptedMSG = 1;
-		if(write(clnt_socket,&AcceptedMSG,sizeof(int)))
+		    int AcceptedMSG = 1;
+            
+		    if(write(clnt_socket,&AcceptedMSG,sizeof(int)))
 		       printf("Accepted message has been sent to this client!\n");	
-		// 대기열에서 벗어났고, 정상적으로 동작한다고 알림
+		    // 대기열에서 벗어났고, 정상적으로 동작한다고 알림
 	    }
         }
         else if(clnt_cnt > CLNT_MAX)
@@ -153,3 +158,4 @@ void* accept_connections(void * arg)
 
     pthread_exit(0);
 }
+

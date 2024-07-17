@@ -35,7 +35,7 @@ int main(int argsNum, char *args[])
 
         if(!is_correctIP(serv_ip, strlen(serv_ip)))
         {
-                printf("\033[0;32mInput server IP address correctly!\n\033[0m");
+                printf("\033[0;32mSYS : Input server IP address correctly!\n\033[0m");
                 return 0;
         }
         else
@@ -52,12 +52,12 @@ return_menu:
     serv_addr.sin_addr.s_addr = inet_addr(serv_ip);
     serv_addr.sin_port = htons(PORT);
 
-    printf("\033[0;32msocket is creating for server...\n\033[0m");
+    printf("\033[0;32mSYS : socket is creating for server...\n\033[0m");
 
     serv_socket = socket(PF_INET, SOCK_STREAM, 0); // TCP용
     if (serv_socket == -1)
     {
-        printf("\033[0;31msocket creation error!\n\033[0m");
+        printf("\033[0;31mSYS : socket creation error!\n\033[0m");
         return 0;
     }
 
@@ -69,18 +69,18 @@ return_menu:
 
     if (connect(serv_socket, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) == -1)
     {
-	    printf("\033[0;31mconnection error!\n\033[0m");
+	    printf("\033[0;31mSYS : connection error!\n\033[0m");
 	    return 0;
     }
     else
     {
 	    printf("\033[0;31mSYS : connecting completed, but server not Accepted!\n\033[0m");
-	    printf("\033[0;31mSYS : waiting for server answer...\n\033[0m");
+	    printf("\033[0;31mSYS : waiting for server answer...\033[0m\n");
 	    int length = read(serv_socket,&serverAccepted,sizeof(int));
 	    if(length > 0)
         	{
                 	if(serverAccepted) // 서버로부터 연결을 승인받음
-                        	printf("\033[0;32mSYS : server Allowed connection!\n\033[0m");
+                        	printf("\033[0;31mSYS : server Allowed connection!\n\033[0m");
 			else // 수신오류
                 	{
 				printf("\033[0;31mSYS : read Err!\n\033[0m");
@@ -93,7 +93,7 @@ return_menu:
 		    return 0;
 	    }
     }
-    printf("\033[0;32mconnecting success!\n\033[0m");
+    printf("\033[0;32mSYS : connecting success!\033[0m\n");
 
     /*-------------------------------------*/
     // 4. 메인메뉴 화면 띄우기
@@ -127,17 +127,17 @@ return_menu:
             break;
 
         case 3:
-            printf("quit sequence\n");
+            printf("\033[0;31mSYS : quit sequence\033[0m\n");
             //clean_process();                                     /* --- 혹시 있을 스레드들 삭제 + 통신프로세스 종료 --- */
             return 0;
             break;
 
         default:
-            printf("\033[0;31mincorrect input, try again\n\033[0m");
+            printf("\033[0;31mSYS : incorrect input, try again\n\033[0m");
             break;
         }
 
-        printf("DB errorCode : %d\n", DB_Err);
+        printf("\033[0;31mDB errorCode : %d\033[0m\n", DB_Err);
     }
 
     /*-------------------------------------*/
@@ -160,7 +160,7 @@ return_menu:
 
     pthread_create(&recv_thread, NULL, recv_msg, (void*)&recv_args); // 수신용 스레드        
     pthread_create(&send_thread, NULL, send_msg, (void*)&send_args); // 송신용 스레드        
-    printf("threads were made for communication right now\n");
+    printf("\033[0;31mSYS : threads were made for communication right now\033[0m\n");
 
     /*-------------------------------------*/
     // 6. 에러확인 + 리소스 반환
@@ -171,14 +171,14 @@ return_menu:
     // 뭐가됬던 플래그만 받고 바로 종료시켜버리기
     pthread_cancel(recv_thread);
     pthread_join(recv_thread,NULL);
-    printf("recv_thread : down\n");
+    printf("\033[0;31mrecv_thread : down\n\033[0m");
     
     pthread_cancel(send_thread);
     pthread_join(send_thread,NULL);
-    printf("send_thread : down\n");
+    printf("\033[0;31msend_thread : down\033[0m\n");
 
     pthread_mutex_destroy(&mtx);
-    printf("threads and mutex were terminated!\n");
+    printf("\033[0;31mSYS : threads and mutex were terminated!\033[0m\n");
 
     if (commuErr == 1)
     {
@@ -190,9 +190,9 @@ return_menu:
         goto return_menu;
     }
     else if (2 <= commuErr && commuErr <= 4)
-        printf("communication errorCode : %d\n", commuErr);
+        printf("\033[0;31mcommunication errorCode : %d\033[0m\n", commuErr);
     
     close(serv_socket); // 완전히 종료
-    printf("good bye~!\n");
+    printf("\033[0;31mSYS : good bye~!\033[0m\n");
     return 0;
 }
