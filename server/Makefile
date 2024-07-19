@@ -8,10 +8,11 @@ serv_out = server.out
 OBJS = serv_shell2.o serv_commu2.o serv_DB.o
 
 CFLAGS = -g -lpthread
+LDFLAGS = -lmysqlclient
 
 # 실행파일 만들기
 $(serv_out) : $(OBJS)
-	$(CC) $(CFLAGS) $(OBJS) -o $@
+	$(CC) $(CFLAGS) $(OBJS) -o $@ $(LDFLAGS)
 	rm *.o
 
 # obj 제작

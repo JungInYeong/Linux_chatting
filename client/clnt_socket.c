@@ -48,7 +48,7 @@ bool login_process(int serv_socket, int* errCode, char* userID)
 		memset(DBmsg, 0, DBPKSIZE);
 		memset(inputID, 0, IDSIZE);
 
-		printf("'q' is quit this sequence\ninput your ID : ");
+		printf("\033[0;31m'q' is quit this sequence\033[0m\ninput your ID : ");
 		fgets(inputID, IDSIZE - 1, stdin);	// 20자까지만 입력받음
 		inputID[strcspn(inputID, "\n")] = 0; // 개행 문자 제거
 
@@ -95,7 +95,7 @@ bool login_process(int serv_socket, int* errCode, char* userID)
 		memset(inputPW, 0, IDSIZE);
 		memset(inputPW2, 0, IDSIZE);
 
-		printf("'q' is quit this sequence\ninput your PW : ");
+		printf("\033[0;31m'q' is quit this sequence\033[0m\ninput your PW : ");
 		fgets(inputPW, IDSIZE - 1, stdin);	// 20자까지만 입력받음
 		inputPW[strcspn(inputPW, "\n")] = 0;			
 
@@ -130,12 +130,10 @@ bool login_process(int serv_socket, int* errCode, char* userID)
 		}
 
 		if (!PWsuccess)
-			printf("\033[0;31m");
-			printf("SYS : Invalid PW, Try again\n");
-			printf("\033[0m");
+			printf("\033[0;31mSYS : Invalid PW, Try again\033[0m\n");
 	}
 	
-	printf("\033[;32mPW is correct!\nmoving to chatting screen...\n\033[0m");
+	printf("\033[0;32mPW is correct!\nmoving to chatting screen...\n\033[0m");
 
 	*errCode = 0;
 	strcpy(userID, inputID);
@@ -163,8 +161,8 @@ restart:
 		memset(inputID, 0, IDSIZE);
 		//system("clear");
 
-		printf("the number of characters is limited to 20 characters\n");
-		printf("'q' is quit this sequence\ninput your Penguin's ID : ");
+		printf("\033[0;31mSYS : the number of characters is limited to 20 characters\n\033[0m");
+		printf("\033[0;31m'q' is quit this sequence\033[0m\ninput your Penguin's ID : ");
 
 		fgets(inputID, IDSIZE - 1, stdin);	// 20자까지만 입력받음
 		inputID[strcspn(inputID, "\n")] = 0;
@@ -230,8 +228,8 @@ restart:
 		memset(inputPW, 0, IDSIZE);
 		memset(inputPW2, 0, IDSIZE);
 
-		printf("the number of characters is limited to 20 characters\n");
-		printf("'q' is quit this sequence\n");
+		printf("\033[0;31mSYS : the number of characters is limited to 20 characters\n\033[0m");
+		printf("\033[0;31m'q' is quit this sequence\033[0m\n");
 		printf("input your Penguin accounts[%s]'s PW : ", inputID);
 
 		fgets(inputPW, IDSIZE - 1, stdin);	// 20자까지만 입력받음
@@ -265,7 +263,7 @@ restart:
 	}
 
 	// 중간에 사용자가 꺼버릴수도 있기 때문에, ID와 비번을 합쳐서 서버에 전송
-	printf("\033[0;32msending the account information to the server...\n\033[0m");
+	printf("\033[0;32msending the account information to the server...\033[0m\n");
 
 	memset(DBmsg, 0, DBPKSIZE);
 	sprintf(DBmsg, "new %s %s", inputID, inputPW);
@@ -293,15 +291,17 @@ restart:
 
 		else
 		{
-			printf("\nquitting this sequence...\n");
+			printf("\n\033[0;31mSYS : quitting this sequence...\033[0m\n");
 			return false;
 		}
 	}
 	else // 회원가입완료
 	{
+		printf("\033[0;31m");
 		printf("sign up process has been completed!\n");
 		printf("you can now enter the server with this account information!\n");
 		printf("moving to chatting screen...\n");
+		printf("\033[0m");
 		strcpy(userID, inputID);
 		*errCode = 0;
 		return true;

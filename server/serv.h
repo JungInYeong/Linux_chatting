@@ -1,6 +1,6 @@
-// serv.h
 #pragma once
 
+//#define DEBUG
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -12,6 +12,12 @@
 #include <pthread.h>
 #include <stdbool.h>
 
+#ifdef DEBUG
+#else
+	#include <mysql/mysql.h>
+#endif
+
+
 #define PORT 7889
 #define CMDLEN 11
 
@@ -19,7 +25,7 @@
 #define BUFFSIZE 131                    // 클라에게 받는 패킷을 담을 버퍼 크기
 #define WAIT_NUM 5                      // accept 받기까지의 대기자 수
 #define IDSIZE 21                       // 사용자 id 최대허용길이
-
+#define INFOSIZE 256			//db에 id pw 으로 저장됨
 // 커맨드
 #define QUIT "-q"
 #define KICK "-k"
@@ -38,6 +44,7 @@ typedef struct
     int temp_List[CLNT_MAX];
 }DATA;
 
+
 void* clnt_handler(void *arg);
 void* input_cmd(void* Args);
 void* accept_connections(void * arg);
@@ -47,7 +54,6 @@ bool extractID(char *clnt_id, int clnt_socket);
 void add_idList(int clnt_socket, char clnt_id[]);
 void DB_extractID(char info[], char clnt_id[]);
 
-#define DEBUG // 디버그용
 #ifdef DEBUG // 디버그용 함수원형
 
 void login_ID(int clnt_socket, char packet[]);
@@ -56,6 +62,10 @@ void unique_ID(int clnt_socket, char packet[]);
 void save_Info(int clnt_socket, char packet[]);
 
 #else
+void login_ID(int clnt_socket, char packet[]);
+void login_PW(int clnt_socket, char packet[]);
+void unique_ID(int clnt_socket, char packet[]);
+void save_Info(int clnt_socket, char packet[]);
 
 // 정인영이 채우기
 
