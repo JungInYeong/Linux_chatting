@@ -1,12 +1,10 @@
 # 리눅스 소켓 프로그래밍
 &nbsp;
-
 &nbsp;
 
 ## ☁️ 프로젝트 소개
 wsl2안에서 Ubuntu를 사용해, C99를 이용해서 CLI기반 간단한 채팅프로그램을 구현해본 프로젝트입니다
 &nbsp;
-
 &nbsp;
 
 ## 🤔 주요기능
@@ -49,7 +47,6 @@ https://github.com/supergravityy/Linux_chatting.git
 
 #### 2. client.out 파일실행시, 서버의 IP주소도 넣어줍니다
    &nbsp;
-
 &nbsp;
 
    ![스크린샷 2024-07-17 185557](https://github.com/user-attachments/assets/27a279ba-3566-409c-a511-d28741c6d3f7)
@@ -58,7 +55,6 @@ https://github.com/supergravityy/Linux_chatting.git
 
 #### 3. 서버와 연결되면, 메인메뉴로 들어가 원하는 작업을 완료하고 다른 사용자들과 채팅을 시작하십시오
    &nbsp;
-
   &nbsp;
    ![스크린샷 2024-07-17 191222](https://github.com/user-attachments/assets/39c6b8fa-81ff-4a0b-aefb-0652953df56e)
 
