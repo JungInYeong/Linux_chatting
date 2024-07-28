@@ -69,3 +69,109 @@ https://github.com/supergravityy/Linux_chatting.git
 (만약, wsl2 안의 리눅스라면, 반드시 포트포워딩작업과 방화벽을 꺼주셔야 합니다 -> 로컬환경에서 작동시 필요 X)
 
 ![스크린샷 2024-07-18 011937](https://github.com/user-attachments/assets/a7ec1a70-a413-4027-8ebc-e0f4f7e6e8b1)
+
+### 💽서버 (RELEASE 모드 기준)
+
+#### 1. Ubuntu 환경 MySQL 설치 및 설정
+
+##### 1) MySQL 설치
+   ```sh
+   $ sudo apt-get install mysql-server -y
+   ```
+
+##### 2) MySQL 포트 변경, 외부 접속허용 설정
+    ```sh
+   $ sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf
+      Port = 자신이 정한 포트번호
+   bind-adress = 0.0.0.0
+   // mysql-bind-address = 127.0.0.1 (외부 접속을 위해 주석처리)
+   ```
+
+##### 3) MySQL 재시작.
+   ```sh
+   $ sudo service mysql restart
+   ```
+
+##### 4) 기존포트(3306) 닫기, 외부 접속포트 방화벽 해제
+    ```sh
+   $ sudo ufw deny 3306 && sudo ufw allow PORT(포트번호)
+   ```
+
+##### 5) MySQL 실행 후, 유저와 IP 접속 권한 만들기
+    ```sh
+   $ sudo mysql – u root
+      - USE mysql;
+      - CREATE USER ‘ID’@’%’ IDENTIFIED BY MYSQL_NATIVE_PASSWORD ‘[PW]’;
+      - CREATE DATABASE <DB명>;
+	   - GRANT ALL PRIVILEGES ON <DB명>.* to ‘ID’@’%’;
+	   - FLUSH PRIVILEGES; (변경사항 적용)
+   ```
+
+#### 2. MySQL C API 자료형
+```
+1) MYSQL : Database 연결에 대한 핸들러입니다. 
+2) MYSQL_RES : 행(SELECT, SHOW, DESCRIBE)을 query의 결과를 나타냅니다.
+3) MYSQL_ROW : 한 행의 데이터에 대한 형식이 안전한 표현, 바이트 문자열의 배열로 구현됨, 행은 mysql_fetch_row(MYSQL_RES *result)를 호출하여 얻습니다.
+4) MYSQL_FIELD : 필드의 이름, 타입, 크기에 관한 정보를 저장하는 자료형입니다.
+```
+
+#### 3. MySQL Database 연결
+```
+1) mysql_init(MYSQL *mysql)
+  - mysql_real_connect()를 위하여 MYSQL 객체 초기화(MYSQL 객체를 초기화 하므로 mysq_real_connect()전에 꼭 호출해야합니다.)
+
+2) mysql_real_connect(MYSQL* mysql, const char* host, const char* user, const char* passwd, const char* db, uint port, const char* unix_socket, uint client_flag)
+ - host에 지정된 서버로 연결을 시도하는 함수
+ - mysql : MYSQL 변수에 대한 포인터 형
+ - host : 연결하고자 하는 서버의 IP Address 혹은 도메인 이름을 적어주면 됩니다. NULL로 적어주면 localhost를 의미합니다.
+ - user : 접속시의 사용자 이름입니다.. NULL이면 현재 login한 user ID가 됩니다.
+ - passwd : user의 암호를 나타냅니다.. NULL이면 암호가 없다는 의미입니다.
+ - db : 접속시에 사용하고자 하는 database를 나타낸다. NULL로 지정을 하면 연결 후에 mysql_select_db() 혹은 mysql_query()를 이용해서 지정할 수 있고, database를 바꿀 수도 있습니다.
+ - port : TCP/IP 연결시에 사용할 포트 번호를 나타냅니다.
+ - unix_socket : 보통 NULL로 하면됩니다.
+ - client_flag : 이 인자도 보통 0으로 해주면 됩니다.
+mysql_real_connect()는 성공적으로 연결이 되면, MYSQL 포인터를 넘겨주고 연결에 실패하였을 경우 NULL을 리턴합니다.
+
+3)mysql_close(MYSQL* mysql)
+  - 서버와 연결을 끊고 mysql에 할당되었던 메모리를 해제합니다.
+```
+
+#### 4. MySQL query 및 결과값 얻어오기
+```
+1) mysql_query(MYSQL* mysql, const char* query)
+  - query 실행 시킴(mysql 클라이언트에서 했던 것 처럼 query의 끝에 ‘;’가 포함되어서는 안 됨)
+
+ 2) mysql_store_result(MYSQL* mysql)
+  -  query의 결과로 리턴되는 ROW들을 한꺼번에 얻어옴
+
+ 3) mysql_fetch_row(MYSQL_ROW* result)
+ - result에 있는 ROW들에서 한 개의 ROW를 얻어 옴
+```
+
+#### 5. MySQL C API 개발환경 구축
+```
+ 1) 라이브러리(mysql.h) 설치
+  - apt-get install libmysqlclient-dev
+
+ 2) include 방법
+ - #include <mysql/mysql.h>
+
+ 3) 컴파일 방법
+ - gcc –o 파일이름 파일이름.c –lmysqlclient
+```
+
+#### 6. Ubuntu환경에서 DB확인 방법
+##### 1) root권환 접속을 합니다.
+  ![스크린샷 2024-07-28 152328](https://github.com/user-attachments/assets/de45f704-c646-42ea-86bb-bb3a61b247e1)
+
+##### 2) DB 종류를 검색합니다.
+  ![스크린샷 2024-07-20 233128](https://github.com/user-attachments/assets/cab0e824-67e4-49e3-a39c-df0ae9a30d90)
+
+##### 3) 사용할 DB를 선택합니다.
+  ![스크린샷 2024-07-20 233235](https://github.com/user-attachments/assets/756e5385-a2d2-4714-ac67-e894da8d92b9)
+
+##### 4) Table을 확인합니다.
+  ![스크린샷 2024-07-20 233320](https://github.com/user-attachments/assets/53895671-1428-4078-9550-a61b65c6712b)
+
+##### 5) Data를 조회합니다.
+  ![스크린샷 2024-07-20 233419](https://github.com/user-attachments/assets/af1ef9cc-eb54-4bba-bdba-28132f15a443)
