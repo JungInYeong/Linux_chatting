@@ -80,7 +80,7 @@ https://github.com/supergravityy/Linux_chatting.git
    ```
 
 ##### 2) MySQL 포트 변경, 외부 접속허용 설정
-```sh
+   ```sh
    $ sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf
 	Port = 자신이 정한 포트번호
    bind-adress = 0.0.0.0
@@ -93,12 +93,12 @@ https://github.com/supergravityy/Linux_chatting.git
    ```
 
 ##### 4) 기존포트(3306) 닫기, 외부 접속포트 방화벽 해제
-```sh
+   ```sh
    $ sudo ufw deny 3306 && sudo ufw allow PORT(포트번호)
    ```
 
 ##### 5) MySQL 실행 후, 유저와 IP 접속 권한 만들기
-    ```
+   ```sh
    $ sudo mysql – u root
       - USE mysql;
       - CREATE USER ‘ID’@’%’ IDENTIFIED BY MYSQL_NATIVE_PASSWORD ‘[PW]’;
@@ -108,7 +108,7 @@ https://github.com/supergravityy/Linux_chatting.git
    ```
 
 #### 2. MySQL C API 자료형
-```
+```sh
 1) MYSQL : Database 연결에 대한 핸들러입니다. 
 2) MYSQL_RES : 행(SELECT, SHOW, DESCRIBE)을 query의 결과를 나타냅니다.
 3) MYSQL_ROW : 한 행의 데이터에 대한 형식이 안전한 표현, 바이트 문자열의 배열로 구현됨, 행은 mysql_fetch_row(MYSQL_RES *result)를 호출하여 얻습니다.
@@ -116,7 +116,7 @@ https://github.com/supergravityy/Linux_chatting.git
 ```
 
 #### 3. MySQL Database 연결
-```
+```sh
 1) mysql_init(MYSQL *mysql)
   - mysql_real_connect()를 위하여 MYSQL 객체 초기화(MYSQL 객체를 초기화 하므로 mysq_real_connect()전에 꼭 호출해야합니다.)
 
@@ -133,12 +133,12 @@ https://github.com/supergravityy/Linux_chatting.git
 
 mysql_real_connect()는 성공적으로 연결이 되면, MYSQL 포인터를 넘겨주고 연결에 실패하였을 경우 NULL을 리턴합니다.
 
-3)mysql_close(MYSQL* mysql)
+3) mysql_close(MYSQL* mysql)
   - 서버와 연결을 끊고 mysql에 할당되었던 메모리를 해제합니다.
 ```
 
 #### 4. MySQL query 및 결과값 얻어오기
-```
+```sh
 1) mysql_query(MYSQL* mysql, const char* query)
   - query 실행 시킴(mysql 클라이언트에서 했던 것 처럼 query의 끝에 ‘;’가 포함되어서는 안 됨)
 
@@ -150,7 +150,7 @@ mysql_real_connect()는 성공적으로 연결이 되면, MYSQL 포인터를 넘
 ```
 
 #### 5. MySQL C API 개발환경 구축
-```
+```sh
  1) 라이브러리(mysql.h) 설치
   - apt-get install libmysqlclient-dev
 
