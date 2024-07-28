@@ -82,7 +82,7 @@ https://github.com/supergravityy/Linux_chatting.git
 ##### 2) MySQL 포트 변경, 외부 접속허용 설정
    ```sh
    $ sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf
-	Port = 자신이 정한 포트번호
+   Port = 자신이 정한 포트번호
    bind-adress = 0.0.0.0
    // mysql-bind-address = 127.0.0.1 (외부 접속을 위해 주석처리)
    ```
@@ -142,22 +142,22 @@ mysql_real_connect()는 성공적으로 연결이 되면, MYSQL 포인터를 넘
 1) mysql_query(MYSQL* mysql, const char* query)
   - query 실행 시킴(mysql 클라이언트에서 했던 것 처럼 query의 끝에 ‘;’가 포함되어서는 안 됨)
 
- 2) mysql_store_result(MYSQL* mysql)
+2) mysql_store_result(MYSQL* mysql)
   -  query의 결과로 리턴되는 ROW들을 한꺼번에 얻어옴
 
- 3) mysql_fetch_row(MYSQL_ROW* result)
+3) mysql_fetch_row(MYSQL_ROW* result)
  - result에 있는 ROW들에서 한 개의 ROW를 얻어 옴
 ```
 
 #### 5. MySQL C API 개발환경 구축
 ```sh
- 1) 라이브러리(mysql.h) 설치
+1) 라이브러리(mysql.h) 설치
   - apt-get install libmysqlclient-dev
 
- 2) include 방법
+2) include 방법
  - #include <mysql/mysql.h>
 
- 3) 컴파일 방법
+3) 컴파일 방법
  - gcc –o 파일이름 파일이름.c –lmysqlclient
 ```
 
