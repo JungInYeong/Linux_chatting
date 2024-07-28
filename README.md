@@ -80,9 +80,9 @@ https://github.com/supergravityy/Linux_chatting.git
    ```
 
 ##### 2) MySQL 포트 변경, 외부 접속허용 설정
-    ```sh
+```sh
    $ sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf
-      Port = 자신이 정한 포트번호
+	Port = 자신이 정한 포트번호
    bind-adress = 0.0.0.0
    // mysql-bind-address = 127.0.0.1 (외부 접속을 위해 주석처리)
    ```
@@ -93,12 +93,12 @@ https://github.com/supergravityy/Linux_chatting.git
    ```
 
 ##### 4) 기존포트(3306) 닫기, 외부 접속포트 방화벽 해제
-    ```sh
+```sh
    $ sudo ufw deny 3306 && sudo ufw allow PORT(포트번호)
    ```
 
 ##### 5) MySQL 실행 후, 유저와 IP 접속 권한 만들기
-    ```sh
+    ```
    $ sudo mysql – u root
       - USE mysql;
       - CREATE USER ‘ID’@’%’ IDENTIFIED BY MYSQL_NATIVE_PASSWORD ‘[PW]’;
@@ -130,6 +130,7 @@ https://github.com/supergravityy/Linux_chatting.git
  - port : TCP/IP 연결시에 사용할 포트 번호를 나타냅니다.
  - unix_socket : 보통 NULL로 하면됩니다.
  - client_flag : 이 인자도 보통 0으로 해주면 됩니다.
+
 mysql_real_connect()는 성공적으로 연결이 되면, MYSQL 포인터를 넘겨주고 연결에 실패하였을 경우 NULL을 리턴합니다.
 
 3)mysql_close(MYSQL* mysql)
