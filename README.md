@@ -27,7 +27,7 @@ DEBUG모드 : .txt 형태로 DB를 만들어, 계정사용기능을 컨트롤
 ## ℹ️ 개발정보
 
 * 개발기간 : 24.07.02 ~ 07.17
-* 개발인원 : 류성수(dbtjdtn325@gmail.com), 정인영
+* 개발인원 : 류성수(dbtjdtn325@gmail.com), 정인영(a57434728@gmail.com)
 * 개발환경 : wsl2 Ubuntu (22.04.4) , C99, MySQL (8.0.32)
 
 ## ⚡설치 및 실행방법
@@ -82,9 +82,6 @@ https://github.com/supergravityy/Linux_chatting.git
 ##### 2) MySQL 포트 변경, 외부 접속허용 설정
    ```sh
    $ sudo vim /etc/mysql/mysql.conf.d/mysqld.cnf
-   Port = 자신이 정한 포트번호
-   bind-adress = 0.0.0.0
-   // mysql-bind-address = 127.0.0.1 (외부 접속을 위해 주석처리)
    ```
 
 ##### 3) MySQL 재시작.
